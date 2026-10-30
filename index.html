@@ -99,7 +99,7 @@
     <label class="label">Your email</label>
     <input class="input" id="register-email" type="email" style="margin-bottom:10px;" />
     <label class="label">Password</label>
-    <input class="input" id="register-password" type="password" style="margin-bottom:10px;" />
+    <input class="input" id="register-password" type="password" placeholder="At least 8 characters" style="margin-bottom:10px;" />
     <label class="label">Choose a plan</label>
     <select class="input" id="register-plan" style="margin-bottom:12px;">
       <option value="entry">Entry — R4,500/mo — 10 assessments, 10 employees</option>
@@ -114,6 +114,34 @@
   </div>
 
   <p id="auth-loading" style="display:none; text-align:center; font-size:13px; color:var(--text-secondary);">Please wait...</p>
+</div>
+
+<!-- BOOT LOADER -->
+<div id="boot-loading" style="max-width:480px; margin:0 auto; padding:4rem 1.5rem; text-align:center;">
+  <p style="font-size:15px; font-weight:600; margin:0 0 6px;">Pro Active Safety Solutions</p>
+  <p id="boot-msg" style="font-size:13px; color:var(--text-secondary); margin:0;">Loading...</p>
+</div>
+
+<!-- SUBSCRIBE SCREEN -->
+<div id="subscribe-screen" style="display:none; max-width:480px; margin:0 auto; min-height:100vh; padding:1.5rem;">
+  <div style="text-align:center; margin:1.5rem 0 1rem;">
+    <p style="font-size:17px; font-weight:700; margin:0;">Activate your subscription</p>
+    <p id="sub-who" style="font-size:12px; color:var(--text-secondary); margin:4px 0 0;"></p>
+  </div>
+  <div class="card" style="margin-bottom:1rem;">
+    <label class="label">Choose your plan</label>
+    <select class="input" id="sub-plan" style="margin-bottom:12px;">
+      <option value="entry">Entry - R4,500/mo - 10 assessments, 10 employees</option>
+      <option value="medium">Medium - R5,999/mo - 25 assessments, 15 employees</option>
+      <option value="unlimited">Unlimited - R8,999/mo - Unlimited assessments &amp; sites, offline mode</option>
+    </select>
+    <p style="font-size:12px; color:var(--text-secondary); margin:0 0 12px; line-height:1.6;">Billed monthly through PayFast (card or instant EFT). Cancel any time from your PayFast account.</p>
+    <p id="sub-sandbox" style="display:none; font-size:12px; color:var(--text-warning); background:var(--bg-warning); border-radius:8px; padding:8px 10px; margin:0 0 12px;">TEST MODE: no real money is taken.</p>
+    <p class="err" id="sub-err" style="display:none;"></p>
+    <p id="sub-wait" style="display:none; font-size:13px; color:var(--text-secondary); margin:0 0 10px;">Confirming your payment... this can take a minute.</p>
+    <button class="btn btn-primary" id="sub-pay-btn" style="margin-bottom:10px;">Pay securely with PayFast</button>
+    <button class="btn" id="sub-logout-btn">Log Out</button>
+  </div>
 </div>
 
 <div id="app" style="display:none;">
@@ -247,6 +275,12 @@
       <p style="font-size:13px; font-weight:600; margin:0 0 6px;">Template mapping</p>
       <p style="font-size:12px; color:var(--text-secondary); margin:0; line-height:1.6;">Exports are structured to match the Hazard WRAC sheet of the IBRA workbook format.</p>
     </div>
+        <div class="card" id="admin-card" style="display:none; margin-top:10px;">
+      <p style="font-size:13px; font-weight:600; margin:0 0 4px;">Admin control</p>
+      <p style="font-size:12px; color:var(--text-secondary); margin:0 0 10px;">You have free unlimited access. Only you can see this.</p>
+      <div id="admin-list" style="font-size:12px;"></div>
+      <button class="btn" id="admin-refresh-btn" style="margin-top:8px;">Refresh list</button>
+    </div>
     <button class="btn" id="logout-btn" style="margin-top:10px;">Log Out</button>
   </div>
 
@@ -278,176 +312,284 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
 (function() {
-  // ---------- Supabase setup ----------
+  // ---------- Secure account setup ----------
+  // The browser only logs in (Supabase) and then asks OUR server for everything else.
+  // Plans, limits, payments and admin rights are all decided on the server.
   var SUPABASE_URL = "https://trcqosuwgifuzkdfwcqm.supabase.co";
   var SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRyY3Fvc3V3Z2lmdXprZGZ3Y3FtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMyMTY2NjEsImV4cCI6MjEwODc5MjY2MX0.mzELT3FtLTtpsL5gnpK8-mvyhZXOgy_2oLjN1j2ksYs";
+  var BASE_URL = "https://pass-backend-ufqr.onrender.com";
   var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  var PLAN_LIMITS = {
-    entry:     { assessments: 10,  employees: 10,  offline: false, label: "Entry (R4,500/mo)" },
-    medium:    { assessments: 25,  employees: 15,  offline: false, label: "Medium (R5,999/mo)" },
-    unlimited: { assessments: null, employees: null, offline: true, label: "Unlimited (R8,999/mo)" }
-  };
+  var me = null; // answer from /api/me
 
-  var currentUser = null;
-  var currentCompany = null; // { id, name, plan }
-  var currentUsage = { assessments_used: 0 };
+  function $(id) { return document.getElementById(id); }
+  function showScreen(name) {
+    $('boot-loading').style.display = name === 'boot' ? 'block' : 'none';
+    $('auth-screen').style.display = name === 'auth' ? 'block' : 'none';
+    $('subscribe-screen').style.display = name === 'subscribe' ? 'block' : 'none';
+    $('app').style.display = name === 'app' ? 'block' : 'none';
+  }
+  function setBootMsg(t) { $('boot-msg').textContent = t; }
 
-  function monthKey() {
-    var d = new Date();
-    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2, '0');
+  async function apiFetch(path, options) {
+    options = options || {};
+    var s = await sb.auth.getSession();
+    var token = s && s.data && s.data.session ? s.data.session.access_token : '';
+    var headers = Object.assign({}, options.headers || {});
+    if (token) headers['Authorization'] = 'Bearer ' + token;
+    if (options.body && !headers['Content-Type']) headers['Content-Type'] = 'application/json';
+    var slow = setTimeout(function() { setBootMsg('Waking up the server, this can take up to a minute...'); }, 4000);
+    try {
+      return await fetch(BASE_URL + path, Object.assign({}, options, { headers: headers }));
+    } finally { clearTimeout(slow); }
   }
 
-  function showAuthScreen() {
-    document.getElementById('auth-screen').style.display = 'block';
-    document.getElementById('app').style.display = 'none';
+  async function loadMe() {
+    var res = await apiFetch('/api/me');
+    if (res.status === 401) { await sb.auth.signOut(); me = null; return 'auth'; }
+    var data = await res.json().catch(function() { return {}; });
+    if (!res.ok) throw new Error(data.error || 'Could not load your account.');
+    me = data;
+    return 'ok';
   }
 
-  function showApp() {
-    document.getElementById('auth-screen').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-  }
-
-  async function loadCompanyForUser(userId) {
-    var memberRes = await sb.from('company_members').select('company_id, role').eq('user_id', userId).limit(1).single();
-    if (memberRes.error || !memberRes.data) throw new Error('No company found for this account.');
-    var companyId = memberRes.data.company_id;
-
-    var companyRes = await sb.from('companies').select('id, name, plan').eq('id', companyId).single();
-    if (companyRes.error) throw new Error('Could not load company details.');
-    currentCompany = companyRes.data;
-
-    var mk = monthKey();
-    var usageRes = await sb.from('usage_counters').select('assessments_used').eq('company_id', companyId).eq('month_key', mk).maybeSingle();
-    if (usageRes.data) {
-      currentUsage = usageRes.data;
-    } else {
-      await sb.from('usage_counters').insert({ company_id: companyId, month_key: mk, assessments_used: 0 });
-      currentUsage = { assessments_used: 0 };
+  async function loadMeAndRoute() {
+    showScreen('boot');
+    setBootMsg('Loading...');
+    try {
+      var r = await loadMe();
+      if (r === 'auth') { showScreen('auth'); return; }
+      if (me.access) { enterApp(); return; }
+      enterSubscribe();
+    } catch (err) {
+      showScreen('auth');
+      var e = $('login-err');
+      e.textContent = err.message || 'Could not connect. Check your signal and try again.';
+      e.style.display = 'block';
     }
   }
 
-  async function checkSessionOnLoad() {
-    var sessionRes = await sb.auth.getSession();
-    var session = sessionRes.data.session;
-    if (!session) { showAuthScreen(); return; }
-    currentUser = session.user;
-    try {
-      await loadCompanyForUser(currentUser.id);
-      showApp();
-      refreshPlanUI();
-    } catch (err) {
-      console.error('Session load error:', err);
-      showAuthScreen();
+  function enterApp() {
+    showScreen('app');
+    refreshPlanUI();
+    setupAdminCard();
+  }
+
+  function enterSubscribe() {
+    showScreen('subscribe');
+    $('sub-who').textContent = me.company.name + ' - ' + me.email;
+    $('sub-plan').value = me.plan in { entry: 1, medium: 1, unlimited: 1 } ? me.plan : 'entry';
+    $('sub-sandbox').style.display = me.payfast_mode === 'sandbox' ? 'block' : 'none';
+    if (me.status === 'past_due' || me.status === 'cancelled') {
+      var e = $('sub-err');
+      e.textContent = me.status === 'past_due' ? 'Your last payment failed. Please pay again to continue.' : 'Your subscription has ended. Subscribe again to continue.';
+      e.style.display = 'block';
     }
   }
 
   function refreshPlanUI() {
-    var banner = document.getElementById('plan-usage-banner');
-    if (!banner || !currentCompany) return;
-    var limits = PLAN_LIMITS[currentCompany.plan];
-    var used = currentUsage.assessments_used || 0;
-    var cap = limits.assessments === null ? 'Unlimited' : (used + ' / ' + limits.assessments);
-    banner.textContent = currentCompany.name + ' — ' + limits.label + ' — Assessments this month: ' + cap;
+    var banner = $('plan-usage-banner');
+    if (!banner || !me) return;
+    var used = me.usage.assessments_used || 0;
+    var cap = me.limits.assessments === null ? 'Unlimited' : (used + ' / ' + me.limits.assessments);
+    var tag = me.is_admin ? 'Admin (free)' : (me.plan_label + ' plan');
+    banner.textContent = me.company.name + ' - ' + tag + ' - Assessments this month: ' + cap;
   }
 
-  document.getElementById('show-register-link').addEventListener('click', function(e) {
-    e.preventDefault();
-    document.getElementById('auth-login').style.display = 'none';
-    document.getElementById('auth-register').style.display = 'block';
+  async function pollForActivation() {
+    showScreen('subscribe');
+    $('sub-wait').style.display = 'block';
+    $('sub-pay-btn').disabled = true;
+    for (var i = 0; i < 24; i++) {
+      await new Promise(function(r) { setTimeout(r, 4000); });
+      try { await loadMe(); } catch (e) { continue; }
+      if (me && me.access) { $('sub-wait').style.display = 'none'; $('sub-pay-btn').disabled = false; enterApp(); return; }
+    }
+    $('sub-wait').style.display = 'none';
+    $('sub-pay-btn').disabled = false;
+    var er = $('sub-err');
+    er.textContent = 'We have not received confirmation from PayFast yet. If you paid, wait a minute and log in again.';
+    er.style.display = 'block';
+  }
+
+  // ---- subscribe / pay ----
+  $('sub-pay-btn').addEventListener('click', async function() {
+    var er = $('sub-err');
+    er.style.display = 'none';
+    var btn = $('sub-pay-btn');
+    btn.disabled = true;
+    try {
+      var res = await apiFetch('/api/payfast/checkout', { method: 'POST', body: JSON.stringify({ plan: $('sub-plan').value }) });
+      var data = await res.json().catch(function() { return {}; });
+      if (!res.ok) throw new Error(data.error || 'Could not start payment.');
+      var form = document.createElement('form');
+      form.method = 'POST';
+      form.action = data.action;
+      Object.keys(data.fields).forEach(function(k) {
+        var inp = document.createElement('input');
+        inp.type = 'hidden'; inp.name = k; inp.value = data.fields[k];
+        form.appendChild(inp);
+      });
+      document.body.appendChild(form);
+      form.submit();
+    } catch (err) {
+      er.textContent = err.message || 'Could not start payment.';
+      er.style.display = 'block';
+      btn.disabled = false;
+    }
   });
-  document.getElementById('show-login-link').addEventListener('click', function(e) {
+  $('sub-logout-btn').addEventListener('click', doLogout);
+
+  // ---- auth forms ----
+  $('show-register-link').addEventListener('click', function(e) {
     e.preventDefault();
-    document.getElementById('auth-register').style.display = 'none';
-    document.getElementById('auth-login').style.display = 'block';
+    $('auth-login').style.display = 'none';
+    $('auth-register').style.display = 'block';
+  });
+  $('show-login-link').addEventListener('click', function(e) {
+    e.preventDefault();
+    $('auth-register').style.display = 'none';
+    $('auth-login').style.display = 'block';
   });
 
-  document.getElementById('login-btn').addEventListener('click', async function() {
-    var errEl = document.getElementById('login-err');
+  $('login-btn').addEventListener('click', async function() {
+    var errEl = $('login-err');
     errEl.style.display = 'none';
-    var email = document.getElementById('login-email').value.trim();
-    var password = document.getElementById('login-password').value;
+    var email = $('login-email').value.trim();
+    var password = $('login-password').value;
     if (!email || !password) {
       errEl.textContent = 'Please enter your email and password.';
       errEl.style.display = 'block';
       return;
     }
-    document.getElementById('auth-loading').style.display = 'block';
+    $('auth-loading').style.display = 'block';
     try {
       var res = await sb.auth.signInWithPassword({ email: email, password: password });
       if (res.error) throw new Error(res.error.message);
-      currentUser = res.data.user;
-      await loadCompanyForUser(currentUser.id);
-      showApp();
-      refreshPlanUI();
+      $('auth-loading').style.display = 'none';
+      await loadMeAndRoute();
     } catch (err) {
       errEl.textContent = err.message || 'Could not log in. Check your details and try again.';
       errEl.style.display = 'block';
     } finally {
-      document.getElementById('auth-loading').style.display = 'none';
+      $('auth-loading').style.display = 'none';
     }
   });
 
-  document.getElementById('register-btn').addEventListener('click', async function() {
-    var errEl = document.getElementById('register-err');
+  $('register-btn').addEventListener('click', async function() {
+    var errEl = $('register-err');
     errEl.style.display = 'none';
-    var companyName = document.getElementById('register-company').value.trim();
-    var email = document.getElementById('register-email').value.trim();
-    var password = document.getElementById('register-password').value;
-    var plan = document.getElementById('register-plan').value;
-
+    var companyName = $('register-company').value.trim();
+    var email = $('register-email').value.trim();
+    var password = $('register-password').value;
+    var plan = $('register-plan').value;
     if (!companyName || !email || !password) {
       errEl.textContent = 'Please fill in all fields.';
       errEl.style.display = 'block';
       return;
     }
-    if (password.length < 6) {
-      errEl.textContent = 'Password must be at least 6 characters.';
+    if (password.length < 8) {
+      errEl.textContent = 'Password must be at least 8 characters.';
       errEl.style.display = 'block';
       return;
     }
-
-    document.getElementById('auth-loading').style.display = 'block';
+    $('auth-loading').style.display = 'block';
     try {
-      var signUpRes = await sb.auth.signUp({ email: email, password: password });
-      if (signUpRes.error) throw new Error(signUpRes.error.message);
-      var userId = signUpRes.data.user.id;
-
-      var companyRes = await sb.from('companies').insert({ name: companyName, plan: plan, owner_user_id: userId }).select().single();
-      if (companyRes.error) throw new Error(companyRes.error.message);
-      var companyId = companyRes.data.id;
-
-      var memberRes = await sb.from('company_members').insert({ company_id: companyId, user_id: userId, role: 'owner' });
-      if (memberRes.error) throw new Error(memberRes.error.message);
-
-      var subRes = await sb.from('subscriptions').insert({ company_id: companyId, plan: plan, status: 'trialing' });
-      if (subRes.error) throw new Error(subRes.error.message);
-
-      await sb.from('usage_counters').insert({ company_id: companyId, month_key: monthKey(), assessments_used: 0 });
-
-      currentUser = signUpRes.data.user;
-      currentCompany = { id: companyId, name: companyName, plan: plan };
-      currentUsage = { assessments_used: 0 };
-      showApp();
-      refreshPlanUI();
+      var res = await apiFetch('/api/register', { method: 'POST', body: JSON.stringify({ companyName: companyName, email: email, password: password, plan: plan }) });
+      var data = await res.json().catch(function() { return {}; });
+      if (!res.ok) throw new Error(data.error || 'Could not create your account. Please try again.');
+      var login = await sb.auth.signInWithPassword({ email: email, password: password });
+      if (login.error) throw new Error('Account created. Please log in.');
+      $('auth-loading').style.display = 'none';
+      await loadMeAndRoute();
     } catch (err) {
       errEl.textContent = err.message || 'Could not create your account. Please try again.';
       errEl.style.display = 'block';
     } finally {
-      document.getElementById('auth-loading').style.display = 'none';
+      $('auth-loading').style.display = 'none';
     }
   });
 
-  document.getElementById('logout-btn').addEventListener('click', async function() {
+  async function doLogout() {
     await sb.auth.signOut();
-    currentUser = null;
-    currentCompany = null;
-    currentUsage = { assessments_used: 0 };
-    showAuthScreen();
-  });
+    me = null;
+    showScreen('auth');
+  }
+  $('logout-btn').addEventListener('click', doLogout);
 
-  checkSessionOnLoad();
-  // ---------- End Supabase setup ----------
+  // ---- admin control (only shown if the SERVER says you are admin; the server re-checks every call) ----
+  var adminCompanies = [];
+  function setupAdminCard() {
+    var card = $('admin-card');
+    if (!me || !me.is_admin) { card.style.display = 'none'; return; }
+    card.style.display = 'block';
+    loadAdminList();
+  }
+  async function loadAdminList() {
+    var list = $('admin-list');
+    list.textContent = 'Loading...';
+    try {
+      var res = await apiFetch('/api/admin/companies');
+      var data = await res.json().catch(function() { return {}; });
+      if (!res.ok) throw new Error(data.error || 'Could not load.');
+      adminCompanies = data.companies || [];
+      renderAdminList();
+    } catch (err) { list.textContent = err.message; }
+  }
+  function renderAdminList() {
+    var list = $('admin-list');
+    if (!adminCompanies.length) { list.textContent = 'No companies yet.'; return; }
+    var html = '';
+    adminCompanies.forEach(function(c) {
+      var end = c.period_end ? c.period_end.slice(0, 10) : '-';
+      html += '<div style="border-top:1px solid var(--border); padding:10px 0;">' +
+        '<p style="margin:0; font-weight:600; font-size:13px;">' + escapeHtml(c.name) + '</p>' +
+        '<p style="margin:2px 0 6px; color:var(--text-secondary);">' + escapeHtml(c.owner_email || '') + '<br>' +
+        escapeHtml(c.plan) + ' - ' + escapeHtml(c.status) + ' - paid until ' + escapeHtml(end) + ' - used ' + c.used + '</p>' +
+        '<div style="display:flex; flex-wrap:wrap; gap:6px;" data-cid="' + escapeHtml(c.id) + '">' +
+        '<button class="btn adm-act" data-act="activate" style="width:auto; height:32px; padding:0 10px; font-size:12px;">Activate</button>' +
+        '<button class="btn adm-act" data-act="suspend" style="width:auto; height:32px; padding:0 10px; font-size:12px;">Suspend</button>' +
+        '<button class="btn adm-act" data-act="plus30" style="width:auto; height:32px; padding:0 10px; font-size:12px;">+30 days</button>' +
+        '<button class="btn adm-act" data-act="reset" style="width:auto; height:32px; padding:0 10px; font-size:12px;">Reset usage</button>' +
+        '<select class="input adm-plan" style="width:auto; height:32px; font-size:12px;"><option value="">Plan...</option><option value="entry">Entry</option><option value="medium">Medium</option><option value="unlimited">Unlimited</option></select>' +
+        '</div></div>';
+    });
+    list.innerHTML = html;
+  }
+  async function adminUpdate(body) {
+    var res = await apiFetch('/api/admin/update', { method: 'POST', body: JSON.stringify(body) });
+    var data = await res.json().catch(function() { return {}; });
+    if (!res.ok) { alert(data.error || 'Update failed.'); return; }
+    await loadAdminList();
+  }
+  $('admin-list').addEventListener('click', function(e) {
+    var btn = e.target.closest('.adm-act');
+    if (!btn) return;
+    var cid = btn.parentNode.getAttribute('data-cid');
+    var act = btn.getAttribute('data-act');
+    if (act === 'activate') adminUpdate({ company_id: cid, status: 'active', extend_days: 30 });
+    else if (act === 'suspend') { if (confirm('Suspend this company?')) adminUpdate({ company_id: cid, status: 'cancelled', extend_days: -3650 }); }
+    else if (act === 'plus30') adminUpdate({ company_id: cid, extend_days: 30 });
+    else if (act === 'reset') adminUpdate({ company_id: cid, reset_usage: true });
+  });
+  $('admin-list').addEventListener('change', function(e) {
+    if (!e.target.classList.contains('adm-plan') || !e.target.value) return;
+    var cid = e.target.parentNode.getAttribute('data-cid');
+    adminUpdate({ company_id: cid, plan: e.target.value });
+  });
+  $('admin-refresh-btn').addEventListener('click', loadAdminList);
+
+  // ---- start ----
+  (async function boot() {
+    var params = new URLSearchParams(window.location.search);
+    var paid = params.get('payment') === 'success';
+    if (window.location.search) { try { window.history.replaceState({}, '', window.location.pathname); } catch (e) {} }
+    var s = await sb.auth.getSession();
+    if (!s.data.session) { showScreen('auth'); return; }
+    await loadMeAndRoute();
+    if (paid && me && !me.access) pollForActivation();
+  })();
+  // ---------- End secure account setup ----------
 
   var entries = [];
   var templateEntries = [];
@@ -641,14 +783,8 @@
 
   async function generateEntry() {
     var genErrElEarly = document.getElementById('pass-gen-err');
-    if (!currentCompany) {
+    if (!me) {
       genErrElEarly.textContent = 'You need to be logged in to generate an assessment.';
-      genErrElEarly.style.display = 'block';
-      return;
-    }
-    var limits = PLAN_LIMITS[currentCompany.plan];
-    if (limits.assessments !== null && (currentUsage.assessments_used || 0) >= limits.assessments) {
-      genErrElEarly.textContent = 'You\'ve reached your ' + limits.label + ' limit of ' + limits.assessments + ' assessments this month. Upgrade your plan, or wait until next month, to generate more.';
       genErrElEarly.style.display = 'block';
       return;
     }
@@ -668,8 +804,7 @@
     draftWrap.style.display = 'none';
 
     var usingTemplate = !!(templateState && templateState.columns && templateState.columns.length > 0 && document.getElementById('template-active-wrap').style.display === 'block');
-    var BASE_URL = "https://pass-backend-ufqr.onrender.com";
-    var BACKEND_URL = usingTemplate ? (BASE_URL + "/api/generate-from-template") : (BASE_URL + "/api/generate-hazard-entry");
+    var API_PATH = usingTemplate ? "/api/generate-from-template" : "/api/generate-hazard-entry";
 
     try {
       var activityName = document.getElementById('pass-activity').value;
@@ -677,24 +812,18 @@
         ? { activityName: activityName, taskNotes: notes, columns: templateState.columns.map(function(c) { return c.text; }) }
         : { activityName: activityName, taskNotes: notes };
 
-      var response = await fetch(BACKEND_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
+      var response = await apiFetch(API_PATH, { method: "POST", body: JSON.stringify(payload) });
       if (!response.ok) {
         var errBody = await response.json().catch(function() { return {}; });
+        if (response.status === 401 || (response.status === 402 && errBody.code === 'no_subscription')) { loadMeAndRoute(); }
         throw new Error(errBody.error || ('Backend error ' + response.status));
       }
       var data = await response.json();
       var rows = data.rows || [];
       if (rows.length === 0) throw new Error('No rows generated');
 
-      // Count this as one assessment used against the monthly plan limit
-      currentUsage.assessments_used = (currentUsage.assessments_used || 0) + 1;
-      sb.from('usage_counters').update({ assessments_used: currentUsage.assessments_used })
-        .eq('company_id', currentCompany.id).eq('month_key', monthKey())
-        .then(function() { refreshPlanUI(); });
+      // The server already counted this assessment; refresh the banner from it
+      loadMe().then(refreshPlanUI).catch(function() {});
 
       if (usingTemplate) {
         templateEntries = templateEntries.concat(rows);
