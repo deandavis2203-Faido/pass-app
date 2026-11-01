@@ -9,6 +9,8 @@
     --radius: 10px;
     --navy: #1F2E3A;
     --navy-light: #2A3D4C;
+    --accent-bg: #1F2E3A;
+    --accent-bg-hover: #2A3D4C;
     --surface-0: #F4F6F8;
     --surface-1: #FFFFFF;
     --surface-2: #FFFFFF;
@@ -22,6 +24,46 @@
     --bg-success: #E6F3E3; --text-success: #2E6B31;
     --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --navy: #8DBDE8;
+    --navy-light: #A5CCEE;
+    --accent-bg: #2F6FA3;
+    --accent-bg-hover: #3B7DB4;
+    --surface-0: #0F1419;
+    --surface-1: #192029;
+    --surface-2: #192029;
+    --text-primary: #E6EBF0;
+    --text-secondary: #A6B2BE;
+    --text-muted: #7E8B97;
+    --border: #2A343F;
+    --border-strong: #3A4653;
+    --bg-danger: #3D2020; --text-danger: #F29B9B;
+    --bg-warning: #3B3118; --text-warning: #E8B95A;
+    --bg-success: #1D3521; --text-success: #86CE8D;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --navy: #8DBDE8;
+    --navy-light: #A5CCEE;
+    --accent-bg: #2F6FA3;
+    --accent-bg-hover: #3B7DB4;
+    --surface-0: #0F1419;
+    --surface-1: #192029;
+    --surface-2: #192029;
+    --text-primary: #E6EBF0;
+    --text-secondary: #A6B2BE;
+    --text-muted: #7E8B97;
+    --border: #2A343F;
+    --border-strong: #3A4653;
+    --bg-danger: #3D2020; --text-danger: #F29B9B;
+    --bg-warning: #3B3118; --text-warning: #E8B95A;
+    --bg-success: #1D3521; --text-success: #86CE8D;
+    }
+  }
+  :root[data-theme="light"] { color-scheme: light; }
+  .theme-opt.active, .theme-opt.active:hover { background: var(--accent-bg); color: #fff; border-color: transparent; }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; padding: 0; background: var(--surface-0); font-family: var(--font-sans); color: var(--text-primary); }
   #app { position: relative; max-width: 480px; margin: 0 auto; min-height: 100vh; background: var(--surface-0); padding-bottom: 76px; }
@@ -41,7 +83,7 @@
   .tab-label { font-size: 10px; }
 
   .card { border: 1px solid var(--border); border-radius: 14px; padding: 1.1rem; background: var(--surface-1); box-shadow: 0 1px 2px rgba(20,30,40,0.04); }
-  .icon-badge { width: 38px; height: 38px; border-radius: 10px; background: var(--navy); display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+  .icon-badge { width: 38px; height: 38px; border-radius: 10px; background: var(--accent-bg); display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
   .icon-badge svg { width: 19px; height: 19px; stroke: white; }
   .card-title { font-size: 14.5px; font-weight: 600; margin: 0 0 3px; }
   .card-desc { font-size: 12px; color: var(--text-secondary); margin: 0 0 12px; line-height: 1.4; }
@@ -49,13 +91,13 @@
   .card-stat-label { font-size: 11.5px; color: var(--text-muted); }
   .card-stat-value { font-size: 15px; font-weight: 600; }
   .progress-track { height: 6px; border-radius: 4px; background: var(--border); overflow: hidden; margin-bottom: 14px; }
-  .progress-fill { height: 100%; background: var(--navy); border-radius: 4px; }
+  .progress-fill { height: 100%; background: var(--accent-bg); border-radius: 4px; }
 
   .btn { width: 100%; height: 42px; border-radius: var(--radius); border: 1px solid var(--border-strong); background: var(--surface-1); color: var(--text-primary); font-size: 14px; cursor: pointer; font-family: inherit; }
   .btn:hover { background: var(--surface-0); }
   .btn:active { transform: scale(0.98); }
-  .btn-primary { background: var(--navy); color: #fff; border: none; }
-  .btn-primary:hover { background: var(--navy-light); }
+  .btn-primary { background: var(--accent-bg); color: #fff; border: none; }
+  .btn-primary:hover { background: var(--accent-bg-hover); }
   .btn-primary:disabled { opacity: 0.6; cursor: default; }
   .btn-sm { width: auto; height: 30px; font-size: 12px; padding: 0 10px; }
 
@@ -67,6 +109,14 @@
   .section-title { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin: 0 0 8px; text-transform: uppercase; letter-spacing: 0.02em; }
   .badge { font-size: 11px; padding: 2px 8px; border-radius: 6px; white-space: nowrap; font-weight: 600; }
 </style>
+<script>
+(function() {
+  try {
+    var t = localStorage.getItem('pass_theme');
+    if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+  } catch (e) {}
+})();
+</script>
 </head>
 <body>
 
@@ -348,14 +398,23 @@
       <p style="font-size:12px; color:var(--text-muted); margin:4px 0 0;">Registration K2025907188 · Northern Cape, South Africa</p>
     </div>
     <div class="card" style="margin-bottom:10px;">
-      <p style="font-size:13px; font-weight:600; margin:0 0 6px;">About this prototype</p>
-      <p style="font-size:12px; color:var(--text-secondary); margin:0; line-height:1.6;">This is an early working prototype for internal review. AI-generated entries are drafts only — always reviewed and signed off by a competent person before use on site.</p>
+      <p style="font-size:13px; font-weight:600; margin:0 0 6px;">About this app</p>
+      <p style="font-size:12px; color:var(--text-secondary); margin:0; line-height:1.6;">AI-generated entries are drafts only — always reviewed and signed off by a competent person before use on site.</p>
     </div>
     <div class="card">
       <p style="font-size:13px; font-weight:600; margin:0 0 6px;">Template mapping</p>
       <p style="font-size:12px; color:var(--text-secondary); margin:0; line-height:1.6;">Exports are structured to match the Hazard WRAC sheet of the IBRA workbook format.</p>
     </div>
-        <button class="btn terms-open" style="margin-top:10px;">Terms and Conditions</button>
+        <div class="card" style="margin-top:10px;">
+      <p style="font-size:13px; font-weight:600; margin:0 0 8px;">Appearance</p>
+      <div style="display:flex; gap:8px;">
+        <button class="btn theme-opt" data-theme-opt="auto">Auto</button>
+        <button class="btn theme-opt" data-theme-opt="light">Light</button>
+        <button class="btn theme-opt" data-theme-opt="dark">Dark</button>
+      </div>
+      <p style="font-size:11px; color:var(--text-muted); margin:8px 0 0;">Auto follows your phone's setting.</p>
+    </div>
+    <button class="btn terms-open" style="margin-top:10px;">Terms and Conditions</button>
     <div class="card" id="team-card" style="display:none; margin-top:10px;">
       <p style="font-size:13px; font-weight:600; margin:0 0 4px;">Your team</p>
       <p id="team-count" style="font-size:12px; color:var(--text-secondary); margin:0 0 10px;"></p>
@@ -550,6 +609,25 @@
   });
   $('sub-logout-btn').addEventListener('click', doLogout);
 
+
+
+  // ---- appearance (Auto / Light / Dark), remembered on this phone ----
+  function currentTheme() {
+    try { var t = localStorage.getItem('pass_theme'); if (t === 'dark' || t === 'light') return t; } catch (e) {}
+    return 'auto';
+  }
+  function applyTheme(t) {
+    var root = document.documentElement;
+    if (t === 'dark' || t === 'light') root.setAttribute('data-theme', t); else root.removeAttribute('data-theme');
+    try { if (t === 'auto') localStorage.removeItem('pass_theme'); else localStorage.setItem('pass_theme', t); } catch (e) {}
+    document.querySelectorAll('.theme-opt').forEach(function(b) {
+      b.classList.toggle('active', b.getAttribute('data-theme-opt') === t);
+    });
+  }
+  document.querySelectorAll('.theme-opt').forEach(function(b) {
+    b.addEventListener('click', function() { applyTheme(b.getAttribute('data-theme-opt')); });
+  });
+  applyTheme(currentTheme());
 
   // ---- terms ----
   document.addEventListener('click', function(e) {
