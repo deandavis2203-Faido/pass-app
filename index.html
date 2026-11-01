@@ -818,6 +818,7 @@
         '<p style="margin:2px 0 6px; color:var(--text-secondary);">' + escapeHtml(c.owner_email || '') + '<br>' +
         escapeHtml(c.plan) + ' - ' + escapeHtml(c.status) + ' - paid until ' + escapeHtml(end) + ' - used ' + c.used + '</p>' +
         '<div style="display:flex; flex-wrap:wrap; gap:6px;" data-cid="' + escapeHtml(c.id) + '">' +
+        '<button class="btn adm-act" data-act="demo3" style="width:auto; height:32px; padding:0 10px; font-size:12px;">3-day demo</button>' +
         '<button class="btn adm-act" data-act="activate" style="width:auto; height:32px; padding:0 10px; font-size:12px;">Activate</button>' +
         '<button class="btn adm-act" data-act="suspend" style="width:auto; height:32px; padding:0 10px; font-size:12px;">Suspend</button>' +
         '<button class="btn adm-act" data-act="plus30" style="width:auto; height:32px; padding:0 10px; font-size:12px;">+30 days</button>' +
@@ -838,8 +839,11 @@
     if (!btn) return;
     var cid = btn.parentNode.getAttribute('data-cid');
     var act = btn.getAttribute('data-act');
-    if (act === 'activate') adminUpdate({ company_id: cid, status: 'active', extend_days: 30 });
-    else if (act === 'suspend') { if (confirm('Suspend this company?')) adminUpdate({ company_id: cid, status: 'cancelled', extend_days: -3650 }); }
+    if (act === 'demo3') {
+      if (!confirm('Give this company a 3-day demo (Starter plan)?')) return;
+      adminUpdate({ company_id: cid, plan: 'starter', status: 'trialing', extend_days: -365 }).then(function() { return adminUpdate({ company_id: cid, extend_days: 3 }); });
+    } else if (act === 'activate') adminUpdate({ company_id: cid, status: 'active', extend_days: 30 });
+    else if (act === 'suspend') { if (confirm('Suspend this company?')) adminUpdate({ company_id: cid, status: 'cancelled', extend_days: -365 }); }
     else if (act === 'plus30') adminUpdate({ company_id: cid, extend_days: 30 });
     else if (act === 'reset') adminUpdate({ company_id: cid, reset_usage: true });
   });
