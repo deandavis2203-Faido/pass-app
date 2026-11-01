@@ -275,7 +275,26 @@
       <p style="font-size:13px; font-weight:600; margin:0 0 6px;">Template mapping</p>
       <p style="font-size:12px; color:var(--text-secondary); margin:0; line-height:1.6;">Exports are structured to match the Hazard WRAC sheet of the IBRA workbook format.</p>
     </div>
-        <div class="card" id="admin-card" style="display:none; margin-top:10px;">
+        <div class="card" id="team-card" style="display:none; margin-top:10px;">
+      <p style="font-size:13px; font-weight:600; margin:0 0 4px;">Your team</p>
+      <p id="team-count" style="font-size:12px; color:var(--text-secondary); margin:0 0 10px;"></p>
+      <div id="team-list" style="font-size:12px;"></div>
+      <div style="border-top:1px solid var(--border); margin-top:10px; padding-top:10px;">
+        <label class="label">Add an employee (their email)</label>
+        <input class="input" id="team-email" type="email" autocapitalize="off" style="margin-bottom:8px;" />
+        <label class="label">Temporary password (8+ characters). Give it to them, they can change it after logging in.</label>
+        <input class="input" id="team-password" type="text" autocapitalize="off" style="margin-bottom:10px;" />
+        <p class="err" id="team-err" style="display:none;"></p>
+        <button class="btn btn-primary" id="team-add-btn">Add employee</button>
+      </div>
+    </div>
+    <div class="card" id="password-card" style="margin-top:10px;">
+      <p style="font-size:13px; font-weight:600; margin:0 0 8px;">Change my password</p>
+      <input class="input" id="new-password" type="password" placeholder="New password (8+ characters)" style="margin-bottom:8px;" />
+      <p class="err" id="password-msg" style="display:none;"></p>
+      <button class="btn" id="password-btn">Change password</button>
+    </div>
+    <div class="card" id="admin-card" style="display:none; margin-top:10px;">
       <p style="font-size:13px; font-weight:600; margin:0 0 4px;">Admin control</p>
       <p style="font-size:12px; color:var(--text-secondary); margin:0 0 10px;">You have free unlimited access. Only you can see this.</p>
       <div id="admin-list" style="font-size:12px;"></div>
@@ -374,6 +393,7 @@
     showScreen('app');
     refreshPlanUI();
     setupAdminCard();
+    setupTeamCard();
   }
 
   function enterSubscribe() {
@@ -381,7 +401,15 @@
     $('sub-who').textContent = me.company.name + ' - ' + me.email;
     $('sub-plan').value = me.plan in { entry: 1, medium: 1, unlimited: 1 } ? me.plan : 'entry';
     $('sub-sandbox').style.display = me.payfast_mode === 'sandbox' ? 'block' : 'none';
-    if (me.status === 'past_due' || me.status === 'cancelled') {
+    var isOwner = me.role === 'owner';
+    $('sub-plan').style.display = isOwner ? 'block' : 'none';
+    $('sub-pay-btn').style.display = isOwner ? 'block' : 'none';
+    if (!isOwner) {
+      var ee = $('sub-err');
+      ee.textContent = 'Your company subscription is not active. Please ask your account owner to renew it.';
+      ee.style.display = 'block';
+    }
+    if (isOwner && (me.status === 'past_due' || me.status === 'cancelled')) {
       var e = $('sub-err');
       e.textContent = me.status === 'past_due' ? 'Your last payment failed. Please pay again to continue.' : 'Your subscription has ended. Subscribe again to continue.';
       e.style.display = 'block';
@@ -517,6 +545,73 @@
     showScreen('auth');
   }
   $('logout-btn').addEventListener('click', doLogout);
+
+
+  // ---- team (owner only; the server re-checks every call) ----
+  function setupTeamCard() {
+    var card = $('team-card');
+    if (!me || me.role !== 'owner') { card.style.display = 'none'; return; }
+    card.style.display = 'block';
+    loadTeam();
+  }
+  async function loadTeam() {
+    var list = $('team-list');
+    list.textContent = 'Loading...';
+    try {
+      var res = await apiFetch('/api/team');
+      var data = await res.json().catch(function() { return {}; });
+      if (!res.ok) throw new Error(data.error || 'Could not load your team.');
+      $('team-count').textContent = 'Users: ' + data.members.length + ' of ' + (data.limit === null ? 'unlimited' : data.limit) + ' on your plan';
+      var html = '';
+      data.members.forEach(function(m) {
+        html += '<div style="display:flex; justify-content:space-between; align-items:center; gap:8px; border-top:1px solid var(--border); padding:8px 0;">' +
+          '<div><p style="margin:0; font-size:13px;">' + escapeHtml(m.email) + '</p>' +
+          '<p style="margin:0; color:var(--text-muted);">' + (m.role === 'owner' ? 'Owner' : 'Employee') + '</p></div>' +
+          (m.role === 'owner' ? '' : '<button class="btn team-remove" data-uid="' + escapeHtml(m.user_id) + '" style="width:auto; height:32px; padding:0 10px; font-size:12px;">Remove</button>') +
+          '</div>';
+      });
+      list.innerHTML = html;
+    } catch (err) { list.textContent = err.message; }
+  }
+  $('team-add-btn').addEventListener('click', async function() {
+    var er = $('team-err');
+    er.style.display = 'none';
+    var btn = $('team-add-btn');
+    btn.disabled = true;
+    try {
+      var res = await apiFetch('/api/team/add', { method: 'POST', body: JSON.stringify({ email: $('team-email').value.trim(), password: $('team-password').value }) });
+      var data = await res.json().catch(function() { return {}; });
+      if (!res.ok) throw new Error(data.error || 'Could not add that user.');
+      $('team-email').value = '';
+      $('team-password').value = '';
+      await loadTeam();
+    } catch (err) {
+      er.textContent = err.message;
+      er.style.display = 'block';
+    } finally { btn.disabled = false; }
+  });
+  $('team-list').addEventListener('click', async function(e) {
+    var btn = e.target.closest('.team-remove');
+    if (!btn) return;
+    if (!confirm('Remove this employee? They will no longer be able to log in.')) return;
+    var res = await apiFetch('/api/team/remove', { method: 'POST', body: JSON.stringify({ user_id: btn.getAttribute('data-uid') }) });
+    var data = await res.json().catch(function() { return {}; });
+    if (!res.ok) { alert(data.error || 'Could not remove that user.'); return; }
+    loadTeam();
+  });
+
+  // ---- change my password ----
+  $('password-btn').addEventListener('click', async function() {
+    var msg = $('password-msg');
+    var pw = $('new-password').value;
+    msg.style.display = 'block';
+    if (pw.length < 8) { msg.style.color = 'var(--text-danger)'; msg.textContent = 'Password must be at least 8 characters.'; return; }
+    var r = await sb.auth.updateUser({ password: pw });
+    if (r.error) { msg.style.color = 'var(--text-danger)'; msg.textContent = r.error.message || 'Could not change the password.'; return; }
+    $('new-password').value = '';
+    msg.style.color = 'var(--text-success)';
+    msg.textContent = 'Password changed.';
+  });
 
   // ---- admin control (only shown if the SERVER says you are admin; the server re-checks every call) ----
   var adminCompanies = [];
