@@ -102,10 +102,15 @@
     <input class="input" id="register-password" type="password" placeholder="At least 8 characters" style="margin-bottom:10px;" />
     <label class="label">Choose a plan</label>
     <select class="input" id="register-plan" style="margin-bottom:12px;">
-      <option value="entry">Entry — R4,500/mo — 10 assessments, 10 employees</option>
-      <option value="medium">Medium — R5,999/mo — 25 assessments, 15 employees</option>
+      <option value="starter">Starter — R1,500/mo — 5 assessments, 2 users</option>
+      <option value="entry">Entry — R4,500/mo — 10 assessments, 10 users</option>
+      <option value="medium">Medium — R5,999/mo — 25 assessments, 15 users</option>
       <option value="unlimited">Unlimited — R8,999/mo — Unlimited assessments & sites, offline mode</option>
     </select>
+    <label style="display:flex; gap:8px; align-items:flex-start; font-size:12px; color:var(--text-secondary); margin:0 0 10px; line-height:1.5;">
+      <input type="checkbox" id="register-terms" style="margin-top:3px;" />
+      <span>I agree to the <a href="#" class="terms-open" style="color:var(--navy); font-weight:600;">Terms and Conditions</a></span>
+    </label>
     <p class="err" id="register-err" style="display:none;"></p>
     <button class="btn btn-primary" id="register-btn" style="margin-bottom:10px;">Create Account</button>
     <p style="font-size:12px; text-align:center; color:var(--text-secondary); margin:0;">
@@ -115,6 +120,80 @@
 
   <p id="auth-loading" style="display:none; text-align:center; font-size:13px; color:var(--text-secondary);">Please wait...</p>
 </div>
+
+<!-- TERMS OVERLAY -->
+<style>
+  #terms-screen { display:none; position:fixed; inset:0; z-index:1000; background:var(--surface-0); overflow-y:auto; }
+  #terms-screen .inner { max-width:480px; margin:0 auto; padding:1rem 1.25rem 3rem; font-size:13px; line-height:1.6; }
+  #terms-screen h2 { font-size:14px; margin:16px 0 4px; color:var(--navy); }
+  #terms-screen p { margin:4px 0; } #terms-screen ul { margin:4px 0 4px 18px; padding:0; }
+  #terms-screen table { border-collapse:collapse; width:100%; font-size:12px; margin:6px 0; }
+  #terms-screen th, #terms-screen td { border:1px solid var(--border-strong); padding:5px 6px; text-align:left; }
+  #terms-screen .small { font-size:11px; color:var(--text-muted); }
+</style>
+<div id="terms-screen"><div class="inner">
+  <p style="font-size:17px; font-weight:700; margin:8px 0 2px;">Terms and Conditions of Service</p>
+  <p style="font-size:11px; color:var(--text-muted); margin:0 0 6px;">Pro Active Safety Solutions (Registration K2025907188) · Version 1.1 · Effective 1 November 2026</p>
+<h2>1. About us and these terms</h2>
+<p>These terms apply between Pro Active Safety Solutions ("we", "us") and the business or person that registers an account ("you", "the Customer") for our online risk assessment service ("the Service"). By registering or paying, you agree to these terms.</p>
+
+<h2>2. What the Service is</h2>
+<p>The Service is a subscription web application for the South African mining and construction industries. You describe a task or activity and the application uses artificial intelligence to draft a risk assessment (hazards, risks and control measures), which can be placed on your own company template and exported. We sell software access only. We do not sell physical goods.</p>
+
+<h2>3. Important notice: AI-generated drafts</h2>
+<p>All output is a <b>draft</b> to assist a competent person. It must be reviewed, corrected and signed off by a competent person before use on site. You remain responsible for compliance with the Mine Health and Safety Act, the Occupational Health and Safety Act and all other applicable law. We do not guarantee that any output is complete, accurate or fit for a particular site or task.</p>
+
+<h2>4. Accounts</h2>
+<ul><li>You must give correct details and keep your password secret. You are responsible for activity under your account.</li>
+<li>Each account belongs to one company. The account owner can add employee logins, up to the number of users allowed on your plan. The owner is responsible for their employees' use of the Service.</li></ul>
+
+<h2>5. Plans and fees</h2>
+<table><tr><th>Plan</th><th>Price per month</th><th>Risk assessments per month</th><th>Users (including the owner)</th></tr>
+<tr><td>Starter</td><td>R1,500</td><td>5</td><td>2</td></tr>
+<tr><td>Entry</td><td>R4,500</td><td>10</td><td>10</td></tr>
+<tr><td>Medium</td><td>R5,999</td><td>25</td><td>15</td></tr>
+<tr><td>Unlimited</td><td>R8,999</td><td>Unlimited</td><td>Unlimited</td></tr></table>
+<p>Prices are in South African Rand. The Unlimited plan also includes unlimited sites and offline mode, which will be made available to Unlimited customers as it is released. Monthly assessment counts reset at the start of each calendar month; unused assessments do not carry over. When your plan limit is reached you can upgrade or wait for the next month.</p>
+
+<h2>6. Payment</h2>
+<p>Fees are charged monthly in advance by recurring card or instant EFT payment through PayFast. We do not store your card details. Your subscription starts when PayFast confirms your first payment, and renews every month until cancelled. If a payment fails, your account is marked past due and access may continue for up to 7 days while payment is retried. Access is then suspended until payment is made.</p>
+
+<h2>7. Delivery policy</h2>
+<p>The Service is delivered digitally. There is nothing to ship. Access starts automatically within minutes of PayFast confirming your payment. If your access has not started within 24 hours of payment, contact us and we will fix it or refund you.</p>
+
+<h2>8. Cancellation policy</h2>
+<ul><li>You may cancel at any time by cancelling the subscription in your PayFast account, or by emailing us at the address below.</li>
+<li>No further charges are made after cancellation. You keep access until the end of the month you have already paid for.</li>
+<li>We may suspend or cancel an account for non-payment, misuse or breach of these terms.</li></ul>
+
+<h2>9. Refund policy</h2>
+<ul><li><b>First payment:</b> you may request a full refund within 7 days of your first payment if you have not generated any assessments.</li>
+<li><b>Billing errors:</b> duplicate or incorrect charges, and payments for access we did not deliver, are refunded in full.</li>
+<li>Otherwise, fees for a month that has started are not refundable.</li>
+<li>Approved refunds are paid back through PayFast to the original payment method, normally within 10 business days.</li></ul>
+
+<h2>10. Your data and privacy</h2>
+<ul><li>You own the information you enter and the assessments created from it. We use it only to provide the Service.</li>
+<li>We process personal information under the Protection of Personal Information Act (POPIA). We do not sell your data. Data is stored with secure cloud providers and each company can only see its own data.</li>
+<li>Your task descriptions are sent to an AI service to generate output. Do not enter information you are not allowed to share.</li>
+<li>You can ask us to export or delete your data by emailing us.</li></ul>
+
+<h2>11. Acceptable use</h2>
+<p>You may not misuse the Service, share your login with other companies, attempt to break or bypass its security or plan limits, or resell it without our written permission.</p>
+
+<h2>12. Availability and liability</h2>
+<p>We work to keep the Service available but cannot promise it will be uninterrupted or error-free. To the extent the law allows, we are not liable for indirect or consequential loss, or for decisions made or work done using the output, and our total liability is limited to the fees you paid in the 3 months before the claim.</p>
+
+<h2>13. Changes</h2>
+<p>We may update these terms or our prices. We will give at least 30 days' notice by email before a price change affects you. If you do not agree, you may cancel before it takes effect.</p>
+
+<h2>14. Governing law and contact</h2>
+<p>These terms are governed by the laws of the Republic of South Africa. Questions, cancellations, refund requests and data requests:<br>
+<b>Pro Active Safety Solutions</b> · Email: proactivesafetysolutions1@outlook.com · Northern Cape, South Africa</p>
+<p class="small">Website: https://deandavis2203-faido.github.io/pass-app/</p>
+
+  <button class="btn btn-primary" id="terms-close-btn" style="margin-top:16px;">Close</button>
+</div></div>
 
 <!-- BOOT LOADER -->
 <div id="boot-loading" style="max-width:480px; margin:0 auto; padding:4rem 1.5rem; text-align:center;">
@@ -131,8 +210,9 @@
   <div class="card" style="margin-bottom:1rem;">
     <label class="label">Choose your plan</label>
     <select class="input" id="sub-plan" style="margin-bottom:12px;">
-      <option value="entry">Entry - R4,500/mo - 10 assessments, 10 employees</option>
-      <option value="medium">Medium - R5,999/mo - 25 assessments, 15 employees</option>
+      <option value="starter">Starter - R1,500/mo - 5 assessments, 2 users</option>
+      <option value="entry">Entry - R4,500/mo - 10 assessments, 10 users</option>
+      <option value="medium">Medium - R5,999/mo - 25 assessments, 15 users</option>
       <option value="unlimited">Unlimited - R8,999/mo - Unlimited assessments &amp; sites, offline mode</option>
     </select>
     <p style="font-size:12px; color:var(--text-secondary); margin:0 0 12px; line-height:1.6;">Billed monthly through PayFast (card or instant EFT). Cancel any time from your PayFast account.</p>
@@ -275,7 +355,8 @@
       <p style="font-size:13px; font-weight:600; margin:0 0 6px;">Template mapping</p>
       <p style="font-size:12px; color:var(--text-secondary); margin:0; line-height:1.6;">Exports are structured to match the Hazard WRAC sheet of the IBRA workbook format.</p>
     </div>
-        <div class="card" id="team-card" style="display:none; margin-top:10px;">
+        <button class="btn terms-open" style="margin-top:10px;">Terms and Conditions</button>
+    <div class="card" id="team-card" style="display:none; margin-top:10px;">
       <p style="font-size:13px; font-weight:600; margin:0 0 4px;">Your team</p>
       <p id="team-count" style="font-size:12px; color:var(--text-secondary); margin:0 0 10px;"></p>
       <div id="team-list" style="font-size:12px;"></div>
@@ -399,7 +480,7 @@
   function enterSubscribe() {
     showScreen('subscribe');
     $('sub-who').textContent = me.company.name + ' - ' + me.email;
-    $('sub-plan').value = me.plan in { entry: 1, medium: 1, unlimited: 1 } ? me.plan : 'entry';
+    $('sub-plan').value = me.plan in { starter: 1, entry: 1, medium: 1, unlimited: 1 } ? me.plan : 'entry';
     $('sub-sandbox').style.display = me.payfast_mode === 'sandbox' ? 'block' : 'none';
     var isOwner = me.role === 'owner';
     $('sub-plan').style.display = isOwner ? 'block' : 'none';
@@ -469,6 +550,17 @@
   });
   $('sub-logout-btn').addEventListener('click', doLogout);
 
+
+  // ---- terms ----
+  document.addEventListener('click', function(e) {
+    var link = e.target.closest ? e.target.closest('.terms-open') : null;
+    if (!link) return;
+    e.preventDefault();
+    $('terms-screen').style.display = 'block';
+    $('terms-screen').scrollTop = 0;
+  });
+  $('terms-close-btn').addEventListener('click', function() { $('terms-screen').style.display = 'none'; });
+
   // ---- auth forms ----
   $('show-register-link').addEventListener('click', function(e) {
     e.preventDefault();
@@ -522,9 +614,14 @@
       errEl.style.display = 'block';
       return;
     }
+    if (!$('register-terms').checked) {
+      errEl.textContent = 'Please tick the box to accept the Terms and Conditions.';
+      errEl.style.display = 'block';
+      return;
+    }
     $('auth-loading').style.display = 'block';
     try {
-      var res = await apiFetch('/api/register', { method: 'POST', body: JSON.stringify({ companyName: companyName, email: email, password: password, plan: plan }) });
+      var res = await apiFetch('/api/register', { method: 'POST', body: JSON.stringify({ companyName: companyName, email: email, password: password, plan: plan, acceptedTerms: true }) });
       var data = await res.json().catch(function() { return {}; });
       if (!res.ok) throw new Error(data.error || 'Could not create your account. Please try again.');
       var login = await sb.auth.signInWithPassword({ email: email, password: password });
@@ -647,7 +744,7 @@
         '<button class="btn adm-act" data-act="suspend" style="width:auto; height:32px; padding:0 10px; font-size:12px;">Suspend</button>' +
         '<button class="btn adm-act" data-act="plus30" style="width:auto; height:32px; padding:0 10px; font-size:12px;">+30 days</button>' +
         '<button class="btn adm-act" data-act="reset" style="width:auto; height:32px; padding:0 10px; font-size:12px;">Reset usage</button>' +
-        '<select class="input adm-plan" style="width:auto; height:32px; font-size:12px;"><option value="">Plan...</option><option value="entry">Entry</option><option value="medium">Medium</option><option value="unlimited">Unlimited</option></select>' +
+        '<select class="input adm-plan" style="width:auto; height:32px; font-size:12px;"><option value="">Plan...</option><option value="starter">Starter</option><option value="entry">Entry</option><option value="medium">Medium</option><option value="unlimited">Unlimited</option></select>' +
         '</div></div>';
     });
     list.innerHTML = html;
