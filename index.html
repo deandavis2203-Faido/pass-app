@@ -229,19 +229,19 @@
     <div class="card" style="margin-bottom:1rem;">
       <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg></div>
       <p class="card-title">Use your own template</p>
-      <p class="card-desc">Upload a blank company risk assessment (.xlsx). The assessment will be generated directly onto its columns, ready to export in that company's own format.</p>
-      <input type="file" id="template-file-input" accept=".xlsx" style="font-size:12px; margin-bottom:10px;" />
+      <p class="card-desc">Upload a blank company risk assessment (Excel .xlsx or Word .docx). The assessment will be generated directly onto its columns, ready to export in that company's own format.</p>
+      <input type="file" id="template-file-input" accept=".xlsx,.docx" style="font-size:12px; margin-bottom:10px;" />
       <p class="err" id="template-upload-err" style="display:none;"></p>
     </div>
 
     <div id="template-detected-wrap" style="display:none;">
       <p class="section-title">Detected columns</p>
       <div class="card" style="margin-bottom:1rem;">
-        <div style="margin-bottom:10px;">
+        <div id="template-sheet-wrap" style="margin-bottom:10px;">
           <label class="label">Sheet</label>
           <select class="input" id="template-sheet-select"></select>
         </div>
-        <div style="margin-bottom:10px;">
+        <div id="template-headerrow-wrap" style="margin-bottom:10px;">
           <label class="label">Header row (where the column titles are)</label>
           <input class="input" id="template-header-row" type="number" min="1" value="1" />
         </div>
@@ -309,6 +309,7 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
 (function() {
@@ -723,6 +724,8 @@
     errEl.style.display = 'none';
     var file = e.target.files[0];
     if (!file) return;
+    if (/\.docx$/i.test(file.name)) { handleDocxFile(file); return; }
+    setXlsxControls(true);
     var reader = new FileReader();
     reader.onload = function(ev) {
       try {
@@ -859,7 +862,242 @@
     }
   }
 
+
+  // ---------- Word (.docx) templates ----------
+  var W_NS = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+
+  function setXlsxControls(show) {
+    var d = show ? 'block' : 'none';
+    document.getElementById('template-sheet-wrap').style.display = d;
+    document.getElementById('template-headerrow-wrap').style.display = d;
+    document.getElementById('template-redetect-btn').style.display = d;
+  }
+
+  function wChildren(el, name) {
+    var out = [];
+    for (var n = el.firstChild; n; n = n.nextSibling) {
+      if (n.nodeType === 1 && n.namespaceURI === W_NS && n.localName === name) out.push(n);
+    }
+    return out;
+  }
+  function wCellText(tc) {
+    var ts = tc.getElementsByTagNameNS(W_NS, 't');
+    var out = '';
+    for (var i = 0; i < ts.length; i++) out += ts[i].textContent;
+    return out.replace(/ /g, ' ').trim();
+  }
+  function wCellSpan(tc) {
+    var pr = wChildren(tc, 'tcPr')[0];
+    if (!pr) return 1;
+    var gs = wChildren(pr, 'gridSpan')[0];
+    var v = gs ? parseInt(gs.getAttributeNS(W_NS, 'val') || gs.getAttribute('w:val'), 10) : 1;
+    return isNaN(v) || v < 1 ? 1 : v;
+  }
+  function wRowCells(tr) { return wChildren(tr, 'tc'); }
+  function wRowIsBlank(tr) {
+    var cells = wRowCells(tr);
+    if (!cells.length) return false;
+    for (var i = 0; i < cells.length; i++) if (wCellText(cells[i]) !== '') return false;
+    return true;
+  }
+  function wRowWidth(tr) {
+    var w = 0;
+    wRowCells(tr).forEach(function(c) { w += wCellSpan(c); });
+    return w;
+  }
+
+  // Finds the main risk table, its header block and the blank rows to fill.
+  function analyseDocxTable(xmlDoc) {
+    var tables = xmlDoc.getElementsByTagNameNS(W_NS, 'tbl');
+    var best = null;
+    for (var t = 0; t < tables.length; t++) {
+      var rows = wChildren(tables[t], 'tr');
+      var hIdx = -1;
+      for (var r = 0; r < Math.min(rows.length, 15); r++) {
+        var txt = wRowCells(rows[r]).map(wCellText).join(' | ');
+        if (/hazard/i.test(txt) && wRowCells(rows[r]).length >= 4) { hIdx = r; break; }
+      }
+      if (hIdx < 0) continue;
+      var score = rows.length - hIdx;
+      if (!best || score > best.score) best = { table: tables[t], rows: rows, hIdx: hIdx, score: score };
+    }
+    if (!best) return null;
+    var rows2 = best.rows, hIdx2 = best.hIdx;
+    // header block = header row plus following non-blank rows (max 3 rows)
+    var hEnd = hIdx2;
+    while (hEnd + 1 < rows2.length && hEnd - hIdx2 < 2 && !wRowIsBlank(rows2[hEnd + 1])) hEnd++;
+    var G = 0;
+    for (var i = hIdx2; i <= hEnd; i++) G = Math.max(G, wRowWidth(rows2[i]));
+    var labels = [];
+    for (var g = 0; g < G; g++) labels.push([]);
+    for (var hr = hIdx2; hr <= hEnd; hr++) {
+      var pos = 0;
+      wRowCells(rows2[hr]).forEach(function(c) {
+        var sp = wCellSpan(c), tx = wCellText(c);
+        for (var k = 0; k < sp; k++) {
+          if (tx && labels[pos + k] && labels[pos + k].indexOf(tx) < 0) labels[pos + k].push(tx);
+        }
+        pos += sp;
+      });
+    }
+    var cols = [], seen = {};
+    for (var gi = 0; gi < G; gi++) {
+      var label = labels[gi].join(' - ').replace(/\s+/g, ' ').trim();
+      if (!label) continue;
+      if (label.length > 120) label = label.slice(0, 120);
+      if (seen[label]) { seen[label]++; label = label + ' (' + seen[label] + ')'; } else seen[label] = 1;
+      cols.push({ index: gi, text: label });
+    }
+    var blanks = [];
+    for (var br = hEnd + 1; br < rows2.length; br++) {
+      if (wRowIsBlank(rows2[br]) && wRowWidth(rows2[br]) === G) blanks.push(rows2[br]);
+      else if (blanks.length) break;
+    }
+    return { table: best.table, rows: rows2, hIdx: hIdx2, hEnd: hEnd, G: G, columns: cols, blanks: blanks, lastRow: rows2[rows2.length - 1] };
+  }
+
+  function handleDocxFile(file) {
+    var errEl = document.getElementById('template-upload-err');
+    if (typeof JSZip === 'undefined') {
+      errEl.textContent = 'Word support did not load. Check your connection and reload the page.';
+      errEl.style.display = 'block';
+      return;
+    }
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      JSZip.loadAsync(ev.target.result).then(function(zip) {
+        var f = zip.file('word/document.xml');
+        if (!f) throw new Error('not a Word file');
+        return f.async('string').then(function(xml) { return { zip: zip, xml: xml }; });
+      }).then(function(res) {
+        var xmlDoc = new DOMParser().parseFromString(res.xml, 'application/xml');
+        if (xmlDoc.getElementsByTagName('parsererror').length) throw new Error('bad xml');
+        var info = analyseDocxTable(xmlDoc);
+        if (!info || info.columns.length === 0) {
+          errEl.textContent = 'Could not find a risk assessment table in that Word file. Make sure the table has a header row with a "Hazard" column.';
+          errEl.style.display = 'block';
+          return;
+        }
+        templateState = { type: 'docx', zip: res.zip, xmlDoc: xmlDoc, info: info, columns: info.columns, fileName: file.name };
+        setXlsxControls(false);
+        renderDetectedColumns(info.columns);
+        document.getElementById('template-detected-wrap').style.display = 'block';
+      }).catch(function(err) {
+        console.error('Docx parse error:', err);
+        errEl.textContent = 'Could not read that file. Make sure it is a valid Word (.docx) file.';
+        errEl.style.display = 'block';
+      });
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function wSetCellText(tc, text) {
+    var doc = tc.ownerDocument;
+    var ps = wChildren(tc, 'p');
+    var p = ps[0];
+    if (!p) { p = doc.createElementNS(W_NS, 'w:p'); tc.appendChild(p); }
+    // remove extra paragraphs
+    for (var i = 1; i < ps.length; i++) tc.removeChild(ps[i]);
+    // find formatting to keep: first run's rPr, else paragraph mark rPr
+    var rPr = null;
+    var runs = wChildren(p, 'r');
+    if (runs.length) { var rp = wChildren(runs[0], 'rPr')[0]; if (rp) rPr = rp.cloneNode(true); }
+    if (!rPr) {
+      var pPr = wChildren(p, 'pPr')[0];
+      if (pPr) { var mark = wChildren(pPr, 'rPr')[0]; if (mark) rPr = mark.cloneNode(true); }
+    }
+    // remove everything in the paragraph except paragraph properties
+    var kids = [];
+    for (var n = p.firstChild; n; n = n.nextSibling) kids.push(n);
+    kids.forEach(function(k) { if (!(k.nodeType === 1 && k.namespaceURI === W_NS && k.localName === 'pPr')) p.removeChild(k); });
+    var run = doc.createElementNS(W_NS, 'w:r');
+    if (rPr) run.appendChild(rPr);
+    String(text).split(/\r?\n/).forEach(function(line, idx) {
+      if (idx > 0) run.appendChild(doc.createElementNS(W_NS, 'w:br'));
+      var t = doc.createElementNS(W_NS, 'w:t');
+      t.setAttributeNS('http://www.w3.org/XML/1998/namespace', 'xml:space', 'preserve');
+      t.textContent = line;
+      run.appendChild(t);
+    });
+    p.appendChild(run);
+  }
+
+  function wCellAtGrid(tr, gridPos) {
+    var pos = 0, cells = wRowCells(tr);
+    for (var i = 0; i < cells.length; i++) {
+      if (pos === gridPos) return cells[i];
+      pos += wCellSpan(cells[i]);
+    }
+    return null;
+  }
+
+  function exportDocx() {
+    if (!templateState || templateState.type !== 'docx' || templateEntries.length === 0) return;
+    try {
+      var info = templateState.info, xmlDoc = templateState.xmlDoc, cols = templateState.columns;
+
+      // top-of-page details (only fills cells that are still empty)
+      var today = new Date().toLocaleDateString('en-ZA');
+      var activity = document.getElementById('pass-activity').value;
+      var ibra = document.getElementById('pass-ibra').value;
+      for (var hr = 0; hr < info.hIdx; hr++) {
+        var cells = wRowCells(info.rows[hr]);
+        for (var ci = 0; ci + 1 < cells.length; ci++) {
+          var lbl = wCellText(cells[ci]).toLowerCase();
+          var val = null;
+          if (lbl === 'scope issue') val = activity;
+          else if (lbl === 'date') val = today;
+          else if (lbl === 'reference number') val = ibra;
+          if (val && wCellText(cells[ci + 1]) === '') wSetCellText(cells[ci + 1], val);
+        }
+      }
+
+      var numberColIndex = -1;
+      cols.forEach(function(c) { if (/^(no\.?|number|#|item)$/i.test(c.text.trim())) numberColIndex = c.index; });
+
+      var lastRow = info.blanks.length ? info.blanks[info.blanks.length - 1] : info.lastRow;
+      var insertAfter = lastRow;
+      templateEntries.forEach(function(rowObj, i) {
+        var tr;
+        if (i < info.blanks.length) {
+          tr = info.blanks[i];
+        } else {
+          tr = lastRow.cloneNode(true);
+          insertAfter.parentNode.insertBefore(tr, insertAfter.nextSibling);
+          insertAfter = tr;
+          // clear any copied text
+          wRowCells(tr).forEach(function(c) { if (wCellText(c) !== '') wSetCellText(c, ''); });
+        }
+        cols.forEach(function(c) {
+          var tc = wCellAtGrid(tr, c.index);
+          if (!tc) return;
+          var v;
+          if (c.index === numberColIndex) v = String(i + 1);
+          else { v = rowObj[c.text]; v = (v === undefined || v === null) ? '' : String(v); }
+          wSetCellText(tc, v);
+        });
+      });
+
+      var xml = new XMLSerializer().serializeToString(xmlDoc);
+      if (xml.indexOf('<?xml') !== 0) xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n' + xml;
+      templateState.zip.file('word/document.xml', xml);
+      templateState.zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' }).then(function(blob) {
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'Filled_' + (templateState.fileName || 'template.docx');
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function() { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+      });
+    } catch (err) {
+      console.error('Word export error:', err);
+      alert('Could not export the filled Word template. Please try again.');
+    }
+  }
+  // ---------- End Word templates ----------
+
   function exportToTemplate() {
+    if (templateState && templateState.type === 'docx') { exportDocx(); return; }
     if (!templateState || !templateState.workbook || templateEntries.length === 0) return;
     try {
       var workbook = templateState.workbook;
