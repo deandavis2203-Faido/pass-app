@@ -108,6 +108,45 @@
 
   .section-title { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin: 0 0 8px; text-transform: uppercase; letter-spacing: 0.02em; }
   .badge { font-size: 11px; padding: 2px 8px; border-radius: 6px; white-space: nowrap; font-weight: 600; }
+
+  /* ---- safety file ---- */
+  .sf-top { display: flex; justify-content: space-between; align-items: center; margin: 8px 0 12px; }
+  .sf-h { font-size: 18px; font-weight: 700; margin: 6px 0; }
+  .sf-note { font-size: 12px; background: var(--bg-warning); color: var(--text-warning); padding: 6px 10px; border-radius: 8px; margin: 0 0 10px; }
+  .sf-hint { font-size: 12px; color: var(--text-secondary); margin: 4px 0 8px; line-height: 1.4; }
+  .sf-ok { font-size: 12px; color: var(--text-success); margin: 8px 0; }
+  .sf-bar { height: 8px; background: var(--surface-0); border: 1px solid var(--border); border-radius: 5px; overflow: hidden; margin-top: 6px; }
+  .sf-bar > div { height: 100%; background: var(--accent-bg); }
+  .sf-counts { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: var(--text-secondary); margin-top: 6px; }
+  .sf-filecard { margin-bottom: 12px; }
+  .sf-sec { border: 1px solid var(--border); border-radius: 12px; background: var(--surface-1); margin-bottom: 10px; overflow: hidden; }
+  .sf-sec > summary { padding: 12px 14px; font-weight: 600; font-size: 14px; cursor: pointer; display: flex; justify-content: space-between; gap: 10px; list-style: none; }
+  .sf-sec > summary::-webkit-details-marker { display: none; }
+  .sf-sec-count { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+  .sf-item { padding: 12px 14px; border-top: 1px solid var(--border); }
+  .sf-item-head { display: flex; gap: 8px; align-items: flex-start; }
+  .sf-item-title { font-size: 13.5px; font-weight: 500; line-height: 1.35; }
+  .sf-badge { font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 6px; white-space: nowrap; margin-top: 1px; }
+  .sf-b-missing { background: var(--bg-danger); color: var(--text-danger); }
+  .sf-b-draft { background: var(--bg-warning); color: var(--text-warning); }
+  .sf-b-done { background: var(--bg-success); color: var(--text-success); }
+  .sf-b-na { background: var(--surface-0); color: var(--text-muted); border: 1px solid var(--border); }
+  .sf-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .sf-actions .btn-sm { height: 32px; }
+  .btn.sf-primary { background: var(--accent-bg); color: #fff; border: none; }
+  .btn.sf-primary:disabled { opacity: 0.6; }
+  .sf-docs { margin-top: 8px; display: grid; gap: 6px; }
+  .sf-doc { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 12.5px; background: var(--surface-0); padding: 6px 8px; border-radius: 8px; }
+  .sf-doc-name { flex: 1 1 100%; word-break: break-all; }
+  .sf-preview { margin-top: 8px; font-size: 12.5px; max-height: 360px; overflow: auto; }
+  .sf-preview:empty { display: none; }
+  .sf-pv-title { font-weight: 700; font-size: 15px; }
+  .sf-pv-h1 { font-weight: 700; margin: 10px 0 2px; }
+  .sf-pv-h2 { font-weight: 600; margin: 8px 0 2px; color: var(--text-secondary); }
+  .sf-pv-tbl { overflow-x: auto; }
+  .sf-pv-tbl table { border-collapse: collapse; font-size: 11.5px; }
+  .sf-pv-tbl th, .sf-pv-tbl td { border: 1px solid var(--border-strong); padding: 3px 6px; text-align: left; vertical-align: top; }
+  .sf-preview ul { margin: 4px 0 4px 18px; padding: 0; }
 </style>
 <script>
 (function() {
@@ -306,6 +345,13 @@
       <button class="btn" onclick="goTab('history')">View Saved Entries</button>
     </div>
 
+    <div class="card" id="home-safety-card" style="margin-bottom:14px; display:none;">
+      <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div>
+      <p class="card-title" id="home-safety-title">Safety File</p>
+      <p class="card-desc">Build a complete site safety file: the index, your documents, blank registers and AI-written plans</p>
+      <button class="btn btn-primary" onclick="openSafety()">Open Safety Files</button>
+    </div>
+
     <p class="section-title" style="margin-top:1.5rem;">Recent activity</p>
     <div id="home-recent"><p style="font-size:12px; color:var(--text-muted);">Nothing yet — generate your first assessment to see it here.</p></div>
   </div>
@@ -443,6 +489,12 @@
     <button class="btn" id="logout-btn" style="margin-top:10px;">Log Out</button>
   </div>
 
+  <!-- SAFETY FILE (no tab; opened from Home) -->
+  <div class="screen" id="screen-safety">
+    <div id="sf-root"></div>
+    <input type="file" id="sf-file" style="display:none" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx">
+  </div>
+
   <div class="tabbar">
     <button class="tab active" data-tab="home" onclick="goTab('home')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
@@ -534,6 +586,7 @@
     refreshPlanUI();
     setupAdminCard();
     setupTeamCard();
+    setupSafetyCard();
   }
 
   function enterSubscribe() {
@@ -854,6 +907,348 @@
   });
   $('admin-refresh-btn').addEventListener('click', loadAdminList);
 
+  // ================= Safety file =================
+  // Admin preview until the server switches it on for everyone (features.safety_file).
+  var sf = { index: [], files: [], cur: null, cache: {}, busy: {}, open: {}, msg: '', view: 'list', editing: null };
+  var SF_FIELDS = [
+    ['name', 'Safety file name', 'text', 'e.g. Shaft 3 refurbishment'],
+    ['company_name', 'Company name', 'text', ''],
+    ['site_name', 'Site name', 'text', ''],
+    ['site_address', 'Site address', 'text', ''],
+    ['client_name', 'Client', 'text', ''],
+    ['sector', 'Sector', 'select', ''],
+    ['project_description', 'Project description and scope of work', 'textarea', 'What is being built or done, and where'],
+    ['key_activities', 'Main activities (one per line)', 'textarea', 'e.g. Excavation\nSteel erection\nWelding'],
+    ['high_risk_work', 'High-risk work', 'text', 'e.g. heights, excavation, hot work, lifting'],
+    ['employees_count', 'Number of employees on site', 'text', ''],
+    ['director_name', 'Director / CEO name', 'text', ''],
+    ['safety_officer', 'Safety officer name', 'text', ''],
+    ['emergency_info', 'Emergency details', 'textarea', 'Nearest hospital, ambulance and site emergency numbers']
+  ];
+  var SF_MIME = { pdf: 'application/pdf', jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png',
+    docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', doc: 'application/msword', xls: 'application/vnd.ms-excel' };
+  var SF_LABEL = { missing: 'Missing', draft: 'Draft', done: 'Done', na: 'N/A' };
+
+  function sfApi(path, opt) {
+    return apiFetch(path, opt).then(function(res) {
+      return res.json().catch(function() { return {}; }).then(function(d) {
+        if (!res.ok) throw new Error(d.error || 'Something went wrong. Please try again.');
+        return d;
+      });
+    });
+  }
+  function sfPost(path, body) { return sfApi(path, { method: 'POST', body: JSON.stringify(body || {}) }); }
+  function sfAttr(s) { return escapeHtml(s).replace(/"/g, '&quot;'); }
+  function sfRoot() { return $('sf-root'); }
+  function sfSize(n) { return n > 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB'; }
+  function sfFind(key) { for (var i = 0; i < sf.index.length; i++) for (var j = 0; j < sf.index[i].items.length; j++) if (sf.index[i].items[j].key === key) return sf.index[i].items[j]; return null; }
+  function sfClean(s) { return String(s || '').replace(/[\\\/:*?"<>|]/g, '').replace(/\s+/g, ' ').trim(); }
+  function sfShort(s, n) { s = String(s); if (s.length <= n) return s; var c = s.slice(0, n), i = c.lastIndexOf(' '); return (i > n * 0.6 ? c.slice(0, i) : c).trim(); }
+  function sfSave(blob, name) {
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click();
+    setTimeout(function() { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+  }
+
+  // ---------- Word document builder (no server needed) ----------
+  function xesc(s) { return String(s == null ? '' : s).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function wRun(t, o) {
+    o = o || {}; var r = '';
+    if (o.b) r += '<w:b/>'; if (o.i) r += '<w:i/>';
+    if (o.color) r += '<w:color w:val="' + o.color + '"/>';
+    if (o.sz) r += '<w:sz w:val="' + o.sz + '"/>';
+    return '<w:r>' + (r ? '<w:rPr>' + r + '</w:rPr>' : '') + '<w:t xml:space="preserve">' + xesc(t) + '</w:t></w:r>';
+  }
+  function wPara(t, o) {
+    o = o || {}; var p = '';
+    if (o.style) p += '<w:pStyle w:val="' + o.style + '"/>';
+    if (o.after != null) p += '<w:spacing w:after="' + o.after + '"/>';
+    if (o.ind) p += '<w:ind w:left="' + o.ind + '" w:hanging="' + (o.hang || 0) + '"/>';
+    return '<w:p>' + (p ? '<w:pPr>' + p + '</w:pPr>' : '') + wRun(t, o) + '</w:p>';
+  }
+  function wTextParas(t, o) { return String(t == null ? '' : t).split(/\r?\n/).map(function(l) { return wPara(l, o); }).join(''); }
+  function wTable(headers, rows, landscape) {
+    var total = landscape ? 15000 : 10200, w = Math.floor(total / headers.length);
+    var bd = ['top', 'left', 'bottom', 'right', 'insideH', 'insideV'].map(function(n) { return '<w:' + n + ' w:val="single" w:sz="4" w:space="0" w:color="808080"/>'; }).join('');
+    var grid = '<w:tblGrid>' + headers.map(function() { return '<w:gridCol w:w="' + w + '"/>'; }).join('') + '</w:tblGrid>';
+    function tr(cells, head) {
+      return '<w:tr><w:trPr><w:cantSplit/>' + (head ? '<w:tblHeader/>' : '<w:trHeight w:val="400" w:hRule="atLeast"/>') + '</w:trPr>' +
+        cells.map(function(c) {
+          return '<w:tc><w:tcPr><w:tcW w:w="' + w + '" w:type="dxa"/>' + (head ? '<w:shd w:val="clear" w:color="auto" w:fill="D9E2EA"/>' : '') + '</w:tcPr>' + wTextParas(c, { b: head, sz: 18, after: 0 }) + '</w:tc>';
+        }).join('') + '</w:tr>';
+    }
+    return '<w:tbl><w:tblPr><w:tblW w:w="' + total + '" w:type="dxa"/><w:tblBorders>' + bd + '</w:tblBorders><w:tblLayout w:type="fixed"/><w:tblCellMar><w:left w:w="80" w:type="dxa"/><w:right w:w="80" w:type="dxa"/></w:tblCellMar></w:tblPr>' +
+      grid + tr(headers, true) + rows.map(function(r) { return tr(r, false); }).join('') + '</w:tbl><w:p/>';
+  }
+  function buildDocxBlob(content, opts) {
+    opts = opts || {};
+    var landscape = content.blocks.some(function(b) { return b.type === 'table' && b.headers.length > 6; });
+    var body = wPara(content.title, { style: 'Title' });
+    if (opts.note) body += wPara(opts.note, { i: true, color: '7A6A00', sz: 18, after: 200 });
+    content.blocks.forEach(function(b) {
+      if (b.type === 'heading') body += wPara(b.text, { style: b.level === 2 ? 'Heading2' : 'Heading1' });
+      else if (b.type === 'p') body += wTextParas(b.text, { after: 120 });
+      else if (b.type === 'bullets') b.items.forEach(function(it) { body += wPara('•  ' + it, { ind: 540, hang: 270, after: 60 }); });
+      else if (b.type === 'table') body += wTable(b.headers, b.rows, landscape);
+    });
+    var pg = landscape ? '<w:pgSz w:w="16838" w:h="11906" w:orient="landscape"/>' : '<w:pgSz w:w="11906" w:h="16838"/>';
+    var sect = '<w:sectPr>' + pg + '<w:pgMar w:top="720" w:right="720" w:bottom="720" w:left="720" w:header="360" w:footer="360" w:gutter="0"/></w:sectPr>';
+    var ns = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"';
+    var styles = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles ' + ns + '><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Calibri"/><w:sz w:val="22"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="120" w:line="264" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults>' +
+      '<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style>' +
+      '<w:style w:type="paragraph" w:styleId="Title"><w:name w:val="Title"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:after="160"/></w:pPr><w:rPr><w:b/><w:color w:val="1F2E3A"/><w:sz w:val="40"/></w:rPr></w:style>' +
+      '<w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:basedOn w:val="Normal"/><w:pPr><w:keepNext/><w:spacing w:before="280" w:after="120"/></w:pPr><w:rPr><w:b/><w:color w:val="1F2E3A"/><w:sz w:val="30"/></w:rPr></w:style>' +
+      '<w:style w:type="paragraph" w:styleId="Heading2"><w:name w:val="heading 2"/><w:basedOn w:val="Normal"/><w:pPr><w:keepNext/><w:spacing w:before="200" w:after="80"/></w:pPr><w:rPr><w:b/><w:color w:val="2F6FA3"/><w:sz w:val="25"/></w:rPr></w:style></w:styles>';
+    var zip = new JSZip();
+    zip.file('[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/></Types>');
+    zip.file('_rels/.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>');
+    zip.file('word/_rels/document.xml.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>');
+    zip.file('word/styles.xml', styles);
+    zip.file('word/document.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document ' + ns + '><w:body>' + body + sect + '</w:body></w:document>');
+    return zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+  }
+  var SF_DRAFT_NOTE = 'DRAFT FOR REVIEW. Prepared with Pro Active Safety Solutions. A competent person must review, correct and approve this document before it is used.';
+
+  // ---------- rendering ----------
+  function sfBar(p) {
+    return '<div class="sf-bar"><div style="width:' + p.percent + '%"></div></div>' +
+      '<div class="sf-counts"><span><b>' + p.percent + '%</b> complete</span><span>Done ' + p.done + '</span><span>Draft ' + p.draft + '</span><span>Missing ' + p.missing + '</span><span>N/A ' + p.na + '</span></div>';
+  }
+  function sfPreviewHtml(c) {
+    return '<p class="sf-pv-title">' + escapeHtml(c.title) + '</p>' + c.blocks.map(function(b) {
+      if (b.type === 'heading') return '<p class="sf-pv-h' + b.level + '">' + escapeHtml(b.text) + '</p>';
+      if (b.type === 'p') return '<p>' + escapeHtml(b.text).replace(/\n/g, '<br>') + '</p>';
+      if (b.type === 'bullets') return '<ul>' + b.items.map(function(i) { return '<li>' + escapeHtml(i) + '</li>'; }).join('') + '</ul>';
+      if (b.type === 'table') return '<div class="sf-pv-tbl"><table><tr>' + b.headers.map(function(h) { return '<th>' + escapeHtml(h) + '</th>'; }).join('') + '</tr>' +
+        b.rows.slice(0, 12).map(function(r) { return '<tr>' + r.map(function(c) { return '<td>' + escapeHtml(c) + '</td>'; }).join('') + '</tr>'; }).join('') + '</table>' +
+        (b.rows.length > 12 ? '<p class="sf-hint">Showing 12 of ' + b.rows.length + ' rows. The Word file has all of them.</p>' : '') + '</div>';
+      return '';
+    }).join('');
+  }
+  function sfItemHtml(it) {
+    var st = sf.cur.items[it.key] || { status: 'missing', docs: [], na: false };
+    var busy = !!sf.busy[it.key];
+    var hasDraft = st.generated;
+    var h = '<div class="sf-item"><div class="sf-item-head"><span class="sf-badge sf-b-' + st.status + '">' + SF_LABEL[st.status] + '</span><span class="sf-item-title">' + escapeHtml(it.key + '  ' + it.title) + '</span></div>';
+    if (it.hint) h += '<p class="sf-hint">' + escapeHtml(it.hint) + '</p>';
+    h += '<div class="sf-actions">';
+    if (it.kind === 'ai') h += '<button class="btn btn-sm sf-primary" data-act="gen" data-key="' + it.key + '"' + (busy ? ' disabled' : '') + '>' + (busy ? 'Writing... up to a minute' : (hasDraft ? 'Rewrite draft' : 'Write draft with AI')) + '</button>';
+    if (it.kind === 'form') h += '<button class="btn btn-sm sf-primary" data-act="gen" data-key="' + it.key + '"' + (busy ? ' disabled' : '') + '>' + (hasDraft ? 'Recreate blank form' : 'Create blank form') + '</button>';
+    if (hasDraft) h += '<button class="btn btn-sm" data-act="prev" data-key="' + it.key + '">Preview</button><button class="btn btn-sm" data-act="dldraft" data-key="' + it.key + '">Download Word</button>';
+    h += '<button class="btn btn-sm" data-act="up" data-key="' + it.key + '">Upload file</button>';
+    h += '<button class="btn btn-sm" data-act="na" data-key="' + it.key + '">' + (st.na ? 'Mark applicable' : 'Not applicable') + '</button></div>';
+    if (st.docs.length) h += '<div class="sf-docs">' + st.docs.map(function(d) {
+      return '<div class="sf-doc"><span class="sf-doc-name">' + escapeHtml(d.name) + ' <em>(' + sfSize(d.size) + ')</em></span><button class="btn btn-sm" data-act="dldoc" data-id="' + d.id + '" data-name="' + sfAttr(d.name) + '">Download</button><button class="btn btn-sm" data-act="deldoc" data-id="' + d.id + '">Delete</button></div>';
+    }).join('') + '</div>';
+    h += '<div class="sf-preview" id="sf-pv-' + it.key.replace('.', '-') + '"></div></div>';
+    return h;
+  }
+  function sfRender() {
+    var r = sfRoot(), h = '';
+    var note = (me && me.features && !me.features.safety_file_public) ? '<p class="sf-note">Admin preview. Customers cannot see this yet.</p>' : '';
+    if (sf.view === 'list') {
+      h += note + '<div class="sf-top"><p class="sf-h">Safety files</p><button class="btn btn-primary btn-sm" data-act="new">New safety file</button></div>';
+      if (sf.msg) h += '<p class="err">' + escapeHtml(sf.msg) + '</p>';
+      if (!sf.files.length) h += '<div class="card"><p class="card-title">No safety files yet</p><p class="card-desc">Create one for a site. You get the full index to fill in, with AI-written plans and blank registers ready to download.</p></div>';
+      sf.files.forEach(function(f) {
+        h += '<div class="card sf-filecard"><p class="card-title">' + escapeHtml(f.name) + '</p><p class="card-desc">' + escapeHtml(f.site_name || '') + '</p>' + sfBar(f.progress) +
+          '<button class="btn btn-primary" style="margin-top:10px" data-act="open" data-id="' + f.id + '">Open</button></div>';
+      });
+    } else if (sf.view === 'form') {
+      var a = sf.editing.answers;
+      h += note + '<p class="sf-h">' + (sf.editing.id ? 'Site details' : 'New safety file') + '</p><p class="sf-hint">The AI uses these details when it writes your documents. Anything you leave blank becomes a [placeholder] for you to fill in.</p>';
+      SF_FIELDS.forEach(function(f) {
+        var v = f[0] === 'name' ? sf.editing.name : (a[f[0]] || '');
+        h += '<label class="label" for="sf-f-' + f[0] + '" style="margin-top:10px">' + f[1] + '</label>';
+        if (f[2] === 'textarea') h += '<textarea class="textarea" id="sf-f-' + f[0] + '" placeholder="' + sfAttr(f[3]) + '">' + escapeHtml(v) + '</textarea>';
+        else if (f[2] === 'select') h += '<select class="input" id="sf-f-sector"><option value="">Choose...</option><option value="construction"' + (v === 'construction' ? ' selected' : '') + '>Construction</option><option value="mining"' + (v === 'mining' ? ' selected' : '') + '>Mining</option><option value="both"' + (v === 'both' ? ' selected' : '') + '>Both</option></select>';
+        else h += '<input class="input" id="sf-f-' + f[0] + '" value="' + sfAttr(v) + '" placeholder="' + sfAttr(f[3]) + '">';
+      });
+      if (sf.msg) h += '<p class="err">' + escapeHtml(sf.msg) + '</p>';
+      h += '<button class="btn btn-primary" style="margin-top:14px" data-act="savedetails">' + (sf.editing.id ? 'Save details' : 'Create safety file') + '</button><button class="btn" style="margin-top:8px" data-act="' + (sf.editing.id ? 'backfile' : 'back') + '">Cancel</button>';
+    } else if (sf.cur) {
+      var c = sf.cur;
+      h += note + '<button class="btn btn-sm" data-act="back">&larr; All safety files</button><p class="sf-h" style="margin-top:12px">' + escapeHtml(c.file.name) + '</p><p class="sf-hint">' + escapeHtml(c.file.site_name || '') + '</p>' + sfBar(c.progress);
+      if (sf.msg) h += '<p class="' + (sf.msg.indexOf('!') === 0 ? 'sf-ok' : 'err') + '">' + escapeHtml(sf.msg.replace(/^!/, '')) + '</p>';
+      h += '<div class="sf-actions" style="margin:12px 0"><button class="btn btn-primary btn-sm" data-act="zip"' + (sf.busy.zip ? ' disabled' : '') + '>' + (sf.busy.zip ? 'Building ZIP...' : 'Download whole file (ZIP)') + '</button><button class="btn btn-sm" data-act="edit">Site details</button><button class="btn btn-sm" data-act="delfile">Delete file</button></div>';
+      sf.index.forEach(function(s) {
+        var done = 0; s.items.forEach(function(i) { var x = c.items[i.key]; if (x && (x.status === 'done' || x.status === 'na')) done++; });
+        h += '<details class="sf-sec" data-sec="' + s.key + '"' + (sf.open[s.key] ? ' open' : '') + '><summary><span>' + escapeHtml(s.key + '. ' + s.title) + '</span><span class="sf-sec-count">' + done + '/' + s.items.length + '</span></summary>' + s.items.map(sfItemHtml).join('') + '</details>';
+      });
+      h += '<p class="sf-hint" style="margin-top:14px">Every draft is written by AI and must be reviewed by a competent person before use.</p>';
+    }
+    r.innerHTML = h;
+  }
+
+  // ---------- loading ----------
+  async function sfLoadList() {
+    try { var d = await sfApi('/api/safety-files'); sf.index = d.index; sf.files = d.files; sf.msg = ''; }
+    catch (e) { sf.msg = e.message; }
+    sf.view = 'list'; sfRender();
+  }
+  async function sfLoadFile(id, keepView) {
+    var d = await sfApi('/api/safety-files/' + id);
+    sf.cur = d; if (!keepView) sf.view = 'file';
+    sfRender();
+  }
+  window.openSafety = function() { goTab('safety'); sf.msg = ''; sfLoadList(); };
+  function setupSafetyCard() {
+    var card = $('home-safety-card');
+    if (!card) return;
+    var on = me && me.features && me.features.safety_file;
+    card.style.display = on ? 'block' : 'none';
+    $('home-safety-title').textContent = on && !me.features.safety_file_public ? 'Safety File (admin preview)' : 'Safety File';
+  }
+
+  // ---------- content ----------
+  async function sfContent(key) {
+    var ck = sf.cur.file.id + ':' + key;
+    if (sf.cache[ck]) return sf.cache[ck];
+    var d = await sfApi('/api/safety-files/' + sf.cur.file.id + '/items/' + key);
+    if (d.generated) sf.cache[ck] = d.generated;
+    return d.generated;
+  }
+  async function sfDownloadDoc(id, name) {
+    var res = await apiFetch('/api/safety-files/' + sf.cur.file.id + '/docs/' + id + '/download');
+    if (!res.ok) throw new Error('Could not download that file.');
+    return res.blob();
+  }
+  async function sfBuildZip() {
+    var c = sf.cur, zip = new JSZip(), rows = [], n = 0, total = 0;
+    sf.index.forEach(function(s) { s.items.forEach(function(i) { total += Math.max(1, c.items[i.key].docs.length); }); });
+    for (var si = 0; si < sf.index.length; si++) {
+      var s = sf.index[si], folder = zip.folder((s.key.length < 2 ? '0' : '') + s.key + ' ' + sfClean(s.title));
+      for (var ii = 0; ii < s.items.length; ii++) {
+        var it = s.items[ii], st = c.items[it.key], base = sfShort(sfClean(it.key + ' ' + it.title), 70);
+        var status = st.status === 'na' ? 'Not applicable' : st.status === 'done' ? 'Done' : st.status === 'draft' ? 'Draft only' : 'MISSING';
+        var files = [];
+        if (st.docs.length) {
+          for (var di = 0; di < st.docs.length; di++) {
+            var d = st.docs[di];
+            sf.msg = '!Adding file ' + (++n) + ' of ' + total + '...'; sfRender();
+            folder.file(base + (st.docs.length > 1 ? ' - ' + d.name : '.' + d.name.split('.').pop()), await sfDownloadDoc(d.id, d.name));
+            files.push(d.name);
+          }
+        } else if (st.generated) {
+          var content = await sfContent(it.key);
+          folder.file(base + ' (DRAFT).docx', await buildDocxBlob(content, { note: SF_DRAFT_NOTE }));
+          files.push('Draft Word file');
+        }
+        rows.push([it.key, it.title, status, files.join(', ')]);
+      }
+    }
+    var a = c.file.answers || {}, p = c.progress;
+    var idx = { title: 'Safety file index: ' + c.file.name, blocks: [
+      { type: 'table', headers: ['Company', 'Site', 'Client', 'Date'], rows: [[a.company_name || '', a.site_name || '', a.client_name || '', new Date().toISOString().slice(0, 10)]] },
+      { type: 'p', text: p.percent + '% complete. Done: ' + p.done + ', draft only: ' + p.draft + ', missing: ' + p.missing + ', not applicable: ' + p.na + '.' },
+      { type: 'table', headers: ['No.', 'Document', 'Status', 'File'], rows: rows }
+    ] };
+    zip.file('00 Index.docx', await buildDocxBlob(idx, { note: SF_DRAFT_NOTE }));
+    return zip.generateAsync({ type: 'blob' });
+  }
+
+  // ---------- actions ----------
+  function sfReadAnswers() {
+    var a = {};
+    SF_FIELDS.forEach(function(f) { if (f[0] !== 'name') a[f[0]] = ($('sf-f-' + f[0]).value || '').trim(); });
+    return { name: ($('sf-f-name').value || '').trim(), answers: a };
+  }
+  function sfRefreshAfter(fn) {
+    return fn().catch(function(e) { sf.msg = e.message; sfRender(); });
+  }
+  document.addEventListener('click', function(e) {
+    var b = e.target.closest ? e.target.closest('#sf-root [data-act]') : null;
+    if (!b) return;
+    var act = b.getAttribute('data-act'), key = b.getAttribute('data-key'), id = b.getAttribute('data-id');
+    sf.msg = '';
+    if (act === 'new') { sf.editing = { id: null, name: '', answers: { company_name: me && me.company ? me.company.name : '' } }; sf.view = 'form'; sfRender(); }
+    else if (act === 'back') sfLoadList();
+    else if (act === 'open') sfRefreshAfter(function() { return sfLoadFile(id); });
+    else if (act === 'backfile') { sf.view = 'file'; sfRender(); }
+    else if (act === 'edit') { sf.editing = { id: sf.cur.file.id, name: sf.cur.file.name, answers: sf.cur.file.answers || {} }; sf.view = 'form'; sfRender(); }
+    else if (act === 'savedetails') {
+      var d = sfReadAnswers();
+      if (!d.name) { sf.msg = 'Give the safety file a name.'; sfRender(); return; }
+      b.disabled = true;
+      sfRefreshAfter(async function() {
+        if (sf.editing.id) { await sfPost('/api/safety-files/' + sf.editing.id + '/update', d); await sfLoadFile(sf.editing.id); }
+        else { var c = await sfPost('/api/safety-files', d); await sfLoadFile(c.id); }
+      });
+    }
+    else if (act === 'delfile') {
+      if (!confirm('Delete this whole safety file and all its uploaded documents? This cannot be undone.')) return;
+      sfRefreshAfter(async function() { await sfPost('/api/safety-files/' + sf.cur.file.id + '/delete'); await sfLoadList(); });
+    }
+    else if (act === 'gen') {
+      sf.busy[key] = true; sfRender();
+      sfRefreshAfter(async function() {
+        try { var r = await sfPost('/api/safety-files/' + sf.cur.file.id + '/items/' + key + '/generate'); sf.cache[sf.cur.file.id + ':' + key] = r.generated; sf.msg = '!Draft ready. Preview it, download the Word file and edit it.'; }
+        finally { sf.busy[key] = false; }
+        await sfLoadFile(sf.cur.file.id);
+      });
+    }
+    else if (act === 'prev') {
+      var box = $('sf-pv-' + key.replace('.', '-'));
+      if (box.innerHTML) { box.innerHTML = ''; return; }
+      box.innerHTML = '<p class="sf-hint">Loading...</p>';
+      sfContent(key).then(function(c) { box.innerHTML = c ? sfPreviewHtml(c) : ''; }).catch(function(er) { box.innerHTML = '<p class="err">' + escapeHtml(er.message) + '</p>'; });
+    }
+    else if (act === 'dldraft') {
+      sfRefreshAfter(async function() {
+        var it = sfFind(key), c = await sfContent(key);
+        sfSave(await buildDocxBlob(c, { note: SF_DRAFT_NOTE }), sfShort(sfClean(key + ' ' + it.title), 70) + ' (DRAFT).docx');
+      });
+    }
+    else if (act === 'na') {
+      var cur = sf.cur.items[key].na;
+      sfRefreshAfter(async function() { await sfPost('/api/safety-files/' + sf.cur.file.id + '/items/' + key + '/na', { na: !cur }); await sfLoadFile(sf.cur.file.id); });
+    }
+    else if (act === 'up') { var fi = $('sf-file'); fi.setAttribute('data-key', key); fi.value = ''; fi.click(); }
+    else if (act === 'dldoc') {
+      var nm = b.getAttribute('data-name');
+      sfRefreshAfter(async function() { sfSave(await sfDownloadDoc(id, nm), nm); });
+    }
+    else if (act === 'deldoc') {
+      if (!confirm('Delete this uploaded file?')) return;
+      sfRefreshAfter(async function() { await sfPost('/api/safety-files/' + sf.cur.file.id + '/docs/' + id + '/delete'); await sfLoadFile(sf.cur.file.id); });
+    }
+    else if (act === 'zip') {
+      sf.busy.zip = true; sfRender();
+      sfRefreshAfter(async function() {
+        try {
+          var blob = await sfBuildZip();
+          sfSave(blob, sfClean(sf.cur.file.name) + ' - Safety File.zip');
+          sf.msg = '!ZIP downloaded. Open it to see the folder for each section.';
+        } finally { sf.busy.zip = false; }
+        sfRender();
+      });
+    }
+  });
+  document.addEventListener('toggle', function(e) {
+    var d = e.target;
+    if (d && d.classList && d.classList.contains('sf-sec')) sf.open[d.getAttribute('data-sec')] = d.open;
+  }, true);
+  $('sf-file').addEventListener('change', function() {
+    var f = this.files && this.files[0], key = this.getAttribute('data-key');
+    if (!f || !key) return;
+    var ext = (f.name.split('.').pop() || '').toLowerCase(), mime = SF_MIME[ext];
+    if (!mime) { sf.msg = 'That file type is not allowed. Use PDF, JPG, PNG, Word or Excel.'; sfRender(); return; }
+    if (f.size > 6 * 1048576) { sf.msg = 'That file is too large. The limit is 6 MB.'; sfRender(); return; }
+    sf.msg = '!Uploading ' + f.name + '...'; sfRender();
+    var rd = new FileReader();
+    rd.onload = function() {
+      var data = String(rd.result).split(',')[1] || '';
+      sfRefreshAfter(async function() {
+        await sfPost('/api/safety-files/' + sf.cur.file.id + '/items/' + key + '/upload', { name: f.name, mime: mime, data: data });
+        sf.msg = '!Uploaded.'; await sfLoadFile(sf.cur.file.id);
+      });
+    };
+    rd.onerror = function() { sf.msg = 'Could not read that file.'; sfRender(); };
+    rd.readAsDataURL(f);
+  });
+
   // ---- start ----
   (async function boot() {
     var params = new URLSearchParams(window.location.search);
@@ -868,14 +1263,14 @@
 
   var entries = [];
   var templateEntries = [];
-  var titles = { home: 'Home', new: 'New Assessment', history: 'History', template: 'Template', settings: 'Settings' };
+  var titles = { home: 'Home', new: 'New Assessment', history: 'History', template: 'Template', settings: 'Settings', safety: 'Safety File' };
   var templateState = null; // { workbook, sheetName, headerRowIndex, columns, fileName }
 
   window.goTab = function(name) {
     document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
     document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
     document.getElementById('screen-' + name).classList.add('active');
-    document.querySelector('.tab[data-tab="' + name + '"]').classList.add('active');
+    var tb = document.querySelector('.tab[data-tab="' + name + '"]'); if (tb) tb.classList.add('active');
     document.getElementById('topbar-title').textContent = titles[name];
     window.scrollTo(0, 0);
   };
