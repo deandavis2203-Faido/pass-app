@@ -112,6 +112,8 @@
   /* ---- safety file ---- */
   .sf-top { display: flex; justify-content: space-between; align-items: center; margin: 8px 0 12px; }
   .sf-h { font-size: 18px; font-weight: 700; margin: 6px 0; }
+  .sf-logo-box { background: #fff; border: 1px solid var(--border, #ccc); border-radius: 8px; padding: 8px; margin: 6px 0 8px; display: inline-block; }
+  .sf-logo-box img { display: block; max-width: 220px; max-height: 80px; }
   .sf-note { font-size: 12px; background: var(--bg-warning); color: var(--text-warning); padding: 6px 10px; border-radius: 8px; margin: 0 0 10px; }
   .sf-hint { font-size: 12px; color: var(--text-secondary); margin: 4px 0 8px; line-height: 1.4; }
   .sf-ok { font-size: 12px; color: var(--text-success); margin: 8px 0; }
@@ -493,6 +495,7 @@
   <div class="screen" id="screen-safety">
     <div id="sf-root"></div>
     <input type="file" id="sf-file" style="display:none" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx">
+    <input type="file" id="sf-logo" style="display:none" accept="image/png,image/jpeg">
   </div>
 
   <div class="tabbar">
@@ -913,7 +916,11 @@
   var SF_FIELDS = [
     ['name', 'Safety file name', 'text', 'e.g. Shaft 3 refurbishment'],
     ['company_name', 'Company name', 'text', ''],
-    ['site_name', 'Site name', 'text', ''],
+    ['letter_reg', 'Registration number', 'text', 'e.g. 2025/907188/07'],
+    ['letter_address', 'Company address', 'text', 'Street, town, postal code'],
+    ['letter_phone', 'Phone', 'text', ''],
+    ['letter_email', 'Email', 'text', ''],
+    ['site_name','Site name', 'text', ''],
     ['site_address', 'Site address', 'text', ''],
     ['client_name', 'Client', 'text', ''],
     ['sector', 'Sector', 'select', ''],
@@ -982,8 +989,29 @@
     return '<w:tbl><w:tblPr><w:tblW w:w="' + total + '" w:type="dxa"/><w:tblBorders>' + bd + '</w:tblBorders><w:tblLayout w:type="fixed"/><w:tblCellMar><w:left w:w="80" w:type="dxa"/><w:right w:w="80" w:type="dxa"/></w:tblCellMar></w:tblPr>' +
       grid + tr(headers, true) + rows.map(function(r) { return tr(r, false); }).join('') + '</w:tbl><w:p/>';
   }
+  function sfLetter(a) {
+    a = a || (sf.cur && sf.cur.file && sf.cur.file.answers) || {};
+    var L = { name: a.company_name || '', reg: a.letter_reg || '', address: a.letter_address || '', phone: a.letter_phone || '', email: a.letter_email || '', logo: a.letter_logo || '' };
+    return (L.name || L.logo || L.address || L.phone || L.email) ? L : null;
+  }
+  function sfLogoDims(L) {
+    return new Promise(function(resolve) {
+      if (!L || !L.logo) return resolve(null);
+      var im = new Image();
+      im.onload = function() {
+        var w = im.naturalWidth || 1, h = im.naturalHeight || 1, mh = 0.65 * 914400, mw = 2.2 * 914400, sc = Math.min(mh / h, mw / w);
+        resolve({ cx: Math.round(w * sc), cy: Math.round(h * sc) });
+      };
+      im.onerror = function() { resolve(null); };
+      im.src = L.logo;
+    });
+  }
   function buildDocxBlob(content, opts) {
     opts = opts || {};
+    var L = opts.letter === undefined ? sfLetter() : opts.letter;
+    return sfLogoDims(L).then(function(dims) { return buildDocxCore(content, opts, L, dims); });
+  }
+  function buildDocxCore(content, opts, L, dims) {
     var landscape = content.blocks.some(function(b) { return b.type === 'table' && b.headers.length > 6; });
     var body = wPara(content.title, { style: 'Title' });
     if (opts.note) body += wPara(opts.note, { i: true, color: '7A6A00', sz: 18, after: 200 });
@@ -993,18 +1021,47 @@
       else if (b.type === 'bullets') b.items.forEach(function(it) { body += wPara('•  ' + it, { ind: 540, hang: 270, after: 60 }); });
       else if (b.type === 'table') body += wTable(b.headers, b.rows, landscape);
     });
+    var hasLogo = !!(L && L.logo && dims), hdr = '', ftr = '';
+    var nsH = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"';
+    if (L) {
+      var tw = landscape ? 15000 : 10200, lw = hasLogo ? 4200 : 600, rw = tw - lw;
+      var logoRun = hasLogo ? '<w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="' + dims.cx + '" cy="' + dims.cy + '"/><wp:docPr id="1" name="Logo"/><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic><pic:nvPicPr><pic:cNvPr id="0" name="logo"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="rId1"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="' + dims.cx + '" cy="' + dims.cy + '"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>' : '';
+      var rp = '<w:pPr><w:spacing w:after="0"/><w:jc w:val="right"/></w:pPr>';
+      function rline(t, o) { return t ? '<w:p>' + rp + wRun(t, o) + '</w:p>' : ''; }
+      var right = rline(L.name, { b: true, sz: 26, color: '1F2E3A' }) + rline(L.reg ? 'Reg. no. ' + L.reg : '', { sz: 17, color: '555555' }) + rline(L.address, { sz: 17, color: '555555' }) +
+        rline([L.phone ? 'Tel: ' + L.phone : '', L.email ? L.email : ''].filter(Boolean).join('   |   '), { sz: 17, color: '555555' });
+      if (!right) right = '<w:p/>';
+      hdr = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:hdr ' + nsH + '><w:tbl><w:tblPr><w:tblW w:w="' + tw + '" w:type="dxa"/><w:tblLayout w:type="fixed"/></w:tblPr><w:tblGrid><w:gridCol w:w="' + lw + '"/><w:gridCol w:w="' + rw + '"/></w:tblGrid><w:tr>' +
+        '<w:tc><w:tcPr><w:tcW w:w="' + lw + '" w:type="dxa"/><w:vAlign w:val="center"/></w:tcPr><w:p><w:pPr><w:spacing w:after="0"/></w:pPr>' + logoRun + '</w:p></w:tc>' +
+        '<w:tc><w:tcPr><w:tcW w:w="' + rw + '" w:type="dxa"/><w:vAlign w:val="center"/></w:tcPr>' + right + '</w:tc></w:tr></w:tbl>' +
+        '<w:p><w:pPr><w:pBdr><w:bottom w:val="single" w:sz="8" w:space="1" w:color="2F6FA3"/></w:pBdr><w:spacing w:after="120"/></w:pPr></w:p></w:hdr>';
+      var fl = (L.name ? xesc(L.name) + '   |   ' : '') + 'Page ';
+      ftr = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:ftr ' + nsH + '><w:p><w:pPr><w:pBdr><w:top w:val="single" w:sz="4" w:space="4" w:color="999999"/></w:pBdr><w:spacing w:after="0"/><w:jc w:val="center"/></w:pPr>' +
+        '<w:r><w:rPr><w:color w:val="666666"/><w:sz w:val="16"/></w:rPr><w:t xml:space="preserve">' + fl + '</w:t></w:r>' +
+        '<w:fldSimple w:instr=" PAGE "><w:r><w:rPr><w:color w:val="666666"/><w:sz w:val="16"/></w:rPr><w:t>1</w:t></w:r></w:fldSimple>' +
+        '<w:r><w:rPr><w:color w:val="666666"/><w:sz w:val="16"/></w:rPr><w:t xml:space="preserve"> of </w:t></w:r>' +
+        '<w:fldSimple w:instr=" NUMPAGES "><w:r><w:rPr><w:color w:val="666666"/><w:sz w:val="16"/></w:rPr><w:t>1</w:t></w:r></w:fldSimple></w:p></w:ftr>';
+    }
     var pg = landscape ? '<w:pgSz w:w="16838" w:h="11906" w:orient="landscape"/>' : '<w:pgSz w:w="11906" w:h="16838"/>';
-    var sect = '<w:sectPr>' + pg + '<w:pgMar w:top="720" w:right="720" w:bottom="720" w:left="720" w:header="360" w:footer="360" w:gutter="0"/></w:sectPr>';
-    var ns = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"';
+    var sect = '<w:sectPr>' + (L ? '<w:headerReference w:type="default" r:id="rId2"/><w:footerReference w:type="default" r:id="rId3"/>' : '') + pg + '<w:pgMar w:top="720" w:right="720" w:bottom="720" w:left="720" w:header="360" w:footer="360" w:gutter="0"/></w:sectPr>';
+    var ns = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"';
     var styles = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles ' + ns + '><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Calibri"/><w:sz w:val="22"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="120" w:line="264" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults>' +
       '<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style>' +
       '<w:style w:type="paragraph" w:styleId="Title"><w:name w:val="Title"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:after="160"/></w:pPr><w:rPr><w:b/><w:color w:val="1F2E3A"/><w:sz w:val="40"/></w:rPr></w:style>' +
       '<w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:basedOn w:val="Normal"/><w:pPr><w:keepNext/><w:spacing w:before="280" w:after="120"/></w:pPr><w:rPr><w:b/><w:color w:val="1F2E3A"/><w:sz w:val="30"/></w:rPr></w:style>' +
       '<w:style w:type="paragraph" w:styleId="Heading2"><w:name w:val="heading 2"/><w:basedOn w:val="Normal"/><w:pPr><w:keepNext/><w:spacing w:before="200" w:after="80"/></w:pPr><w:rPr><w:b/><w:color w:val="2F6FA3"/><w:sz w:val="25"/></w:rPr></w:style></w:styles>';
     var zip = new JSZip();
-    zip.file('[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/></Types>');
+    zip.file('[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="png" ContentType="image/png"/><Default Extension="jpeg" ContentType="image/jpeg"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>' + (L ? '<Override PartName="/word/header1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml"/><Override PartName="/word/footer1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/>' : '') + '</Types>');
     zip.file('_rels/.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>');
-    zip.file('word/_rels/document.xml.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>');
+    zip.file('word/_rels/document.xml.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>' + (L ? '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/header" Target="header1.xml"/><Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/>' : '') + '</Relationships>');
+    if (L) {
+      zip.file('word/header1.xml', hdr); zip.file('word/footer1.xml', ftr);
+      if (hasLogo) {
+        var ext = L.logo.indexOf('data:image/png') === 0 ? 'png' : 'jpeg';
+        zip.file('word/media/logo.' + ext, L.logo.split(',')[1], { base64: true });
+        zip.file('word/_rels/header1.xml.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/logo.' + ext + '"/></Relationships>');
+      }
+    }
     zip.file('word/styles.xml', styles);
     zip.file('word/document.xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document ' + ns + '><w:body>' + body + sect + '</w:body></w:document>');
     return zip.generateAsync({ type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
@@ -1061,6 +1118,13 @@
       h += note + '<p class="sf-h">' + (sf.editing.id ? 'Site details' : 'New safety file') + '</p><p class="sf-hint">The AI uses these details when it writes your documents. Anything you leave blank becomes a [placeholder] for you to fill in.</p>';
       SF_FIELDS.forEach(function(f) {
         var v = f[0] === 'name' ? sf.editing.name : (a[f[0]] || '');
+        if (f[0] === 'letter_reg') h += '<p class="sf-h" style="margin-top:18px;font-size:15px">Letterhead</p><p class="sf-hint">Shown at the top of every Word document, with the company name and page numbers at the bottom.</p>';
+        if (f[0] === 'site_name') {
+          h += '<label class="label" style="margin-top:10px">Company logo (optional)</label>' +
+            (a.letter_logo ? '<div class="sf-logo-box"><img src="' + sfAttr(a.letter_logo) + '" alt="Logo"></div><div class="sf-actions"><button class="btn btn-sm" data-act="pickLogo">Change logo</button><button class="btn btn-sm" data-act="rmLogo">Remove logo</button></div>'
+              : '<div class="sf-actions"><button class="btn btn-sm" data-act="pickLogo">Upload logo (PNG or JPG)</button></div>') +
+            '<p class="sf-hint" style="margin-top:14px">Details of this site</p>';
+        }
         h += '<label class="label" for="sf-f-' + f[0] + '" style="margin-top:10px">' + f[1] + '</label>';
         if (f[2] === 'textarea') h += '<textarea class="textarea" id="sf-f-' + f[0] + '" placeholder="' + sfAttr(f[3]) + '">' + escapeHtml(v) + '</textarea>';
         else if (f[2] === 'select') h += '<select class="input" id="sf-f-sector"><option value="">Choose...</option><option value="construction"' + (v === 'construction' ? ' selected' : '') + '>Construction</option><option value="mining"' + (v === 'mining' ? ' selected' : '') + '>Mining</option><option value="both"' + (v === 'both' ? ' selected' : '') + '>Both</option></select>';
@@ -1153,6 +1217,7 @@
   function sfReadAnswers() {
     var a = {};
     SF_FIELDS.forEach(function(f) { if (f[0] !== 'name') a[f[0]] = ($('sf-f-' + f[0]).value || '').trim(); });
+    if (sf.editing && sf.editing.answers && sf.editing.answers.letter_logo) a.letter_logo = sf.editing.answers.letter_logo;
     return { name: ($('sf-f-name').value || '').trim(), answers: a };
   }
   function sfRefreshAfter(fn) {
@@ -1163,7 +1228,13 @@
     if (!b) return;
     var act = b.getAttribute('data-act'), key = b.getAttribute('data-key'), id = b.getAttribute('data-id');
     sf.msg = '';
-    if (act === 'new') { sf.editing = { id: null, name: '', answers: { company_name: me && me.company ? me.company.name : '' } }; sf.view = 'form'; sfRender(); }
+    if (act === 'new') {
+      var pre = { company_name: me && me.company ? me.company.name : '' };
+      try { var sv = JSON.parse(localStorage.getItem('sf_letter') || '{}'); ['company_name', 'letter_reg', 'letter_address', 'letter_phone', 'letter_email', 'letter_logo'].forEach(function(k) { if (sv[k]) pre[k] = sv[k]; }); } catch (x) {}
+      sf.editing = { id: null, name: '', answers: pre }; sf.view = 'form'; sfRender();
+    }
+    else if (act === 'pickLogo') { var li = $('sf-logo'); li.value = ''; li.click(); }
+    else if (act === 'rmLogo') { var cur0 = sfReadAnswers(); sf.editing.name = cur0.name; sf.editing.answers = cur0.answers; delete sf.editing.answers.letter_logo; sfRender(); }
     else if (act === 'back') sfLoadList();
     else if (act === 'open') sfRefreshAfter(function() { return sfLoadFile(id); });
     else if (act === 'backfile') { sf.view = 'file'; sfRender(); }
@@ -1172,6 +1243,7 @@
       var d = sfReadAnswers();
       if (!d.name) { sf.msg = 'Give the safety file a name.'; sfRender(); return; }
       b.disabled = true;
+      try { var lt = {}; ['company_name', 'letter_reg', 'letter_address', 'letter_phone', 'letter_email', 'letter_logo'].forEach(function(k) { if (d.answers[k]) lt[k] = d.answers[k]; }); localStorage.setItem('sf_letter', JSON.stringify(lt)); } catch (x) {}
       sfRefreshAfter(async function() {
         if (sf.editing.id) { await sfPost('/api/safety-files/' + sf.editing.id + '/update', d); await sfLoadFile(sf.editing.id); }
         else { var c = await sfPost('/api/safety-files', d); await sfLoadFile(c.id); }
@@ -1230,6 +1302,39 @@
     var d = e.target;
     if (d && d.classList && d.classList.contains('sf-sec')) sf.open[d.getAttribute('data-sec')] = d.open;
   }, true);
+  // Logo: shrink in the browser so it stays small (max about 50 KB).
+  function sfShrinkLogo(file) {
+    return new Promise(function(resolve, reject) {
+      var url = URL.createObjectURL(file), img = new Image();
+      img.onload = function() {
+        URL.revokeObjectURL(url);
+        var tries = [[420, 'png'], [320, 'png'], [420, 'jpeg'], [320, 'jpeg'], [220, 'jpeg'], [140, 'jpeg']];
+        for (var i = 0; i < tries.length; i++) {
+          var maxW = tries[i][0], kind = tries[i][1];
+          var sc = Math.min(1, maxW / img.naturalWidth, 160 / img.naturalHeight);
+          var w = Math.max(1, Math.round(img.naturalWidth * sc)), h = Math.max(1, Math.round(img.naturalHeight * sc));
+          var cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+          var cx = cv.getContext('2d');
+          if (kind === 'jpeg') { cx.fillStyle = '#fff'; cx.fillRect(0, 0, w, h); }
+          cx.drawImage(img, 0, 0, w, h);
+          var out = cv.toDataURL(kind === 'png' ? 'image/png' : 'image/jpeg', 0.85);
+          if (out.length <= 65000) return resolve(out);
+        }
+        reject(new Error('That logo is too detailed. Use a simpler or smaller image.'));
+      };
+      img.onerror = function() { URL.revokeObjectURL(url); reject(new Error('Could not read that image. Use a PNG or JPG.')); };
+      img.src = url;
+    });
+  }
+  $('sf-logo').addEventListener('change', function() {
+    var f = this.files && this.files[0];
+    if (!f) return;
+    if (!/^image\/(png|jpeg)$/.test(f.type)) { sf.msg = 'Use a PNG or JPG logo.'; sfRender(); return; }
+    var cur = sfReadAnswers();
+    sfShrinkLogo(f).then(function(d) {
+      sf.editing.name = cur.name; sf.editing.answers = cur.answers; sf.editing.answers.letter_logo = d; sf.msg = ''; sfRender();
+    }).catch(function(er) { sf.editing.name = cur.name; sf.editing.answers = cur.answers; sf.msg = er.message; sfRender(); });
+  });
   $('sf-file').addEventListener('change', function() {
     var f = this.files && this.files[0], key = this.getAttribute('data-key');
     if (!f || !key) return;
