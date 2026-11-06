@@ -4,25 +4,32 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Pro Active Safety Solutions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --radius: 10px;
-    --navy: #1F2E3A;
-    --navy-light: #2A3D4C;
-    --accent-bg: #1F2E3A;
-    --accent-bg-hover: #2A3D4C;
-    --surface-0: #F4F6F8;
+    --navy: #16293B;
+    --navy-light: #20374D;
+    --accent-bg: #16293B;
+    --accent-bg-hover: #20374D;
+    --ink: #101C28;
+    --amber: #F5A300;
+    --steel: #2F6FA3;
+    --surface-0: #EDF0F3;
     --surface-1: #FFFFFF;
     --surface-2: #FFFFFF;
     --text-primary: #1A2530;
     --text-secondary: #5C6B78;
     --text-muted: #8A97A2;
-    --border: #E2E6EA;
-    --border-strong: #C7CDD3;
+    --border: #DCE1E6;
+    --border-strong: #C2C9D0;
     --bg-danger: #FCEBEB; --text-danger: #A32D2D;
     --bg-warning: #FCF3DC; --text-warning: #92600A;
     --bg-success: #E6F3E3; --text-success: #2E6B31;
-    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-sans: "Barlow", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-head: "Barlow Semi Condensed", "Barlow", -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   }
   :root[data-theme="dark"] {
     color-scheme: dark;
@@ -30,9 +37,10 @@
     --navy-light: #A5CCEE;
     --accent-bg: #2F6FA3;
     --accent-bg-hover: #3B7DB4;
-    --surface-0: #0F1419;
-    --surface-1: #192029;
-    --surface-2: #192029;
+    --ink: #0A1017;
+    --surface-0: #0D1217;
+    --surface-1: #151C23;
+    --surface-2: #151C23;
     --text-primary: #E6EBF0;
     --text-secondary: #A6B2BE;
     --text-muted: #7E8B97;
@@ -49,9 +57,10 @@
     --navy-light: #A5CCEE;
     --accent-bg: #2F6FA3;
     --accent-bg-hover: #3B7DB4;
-    --surface-0: #0F1419;
-    --surface-1: #192029;
-    --surface-2: #192029;
+    --ink: #0A1017;
+    --surface-0: #0D1217;
+    --surface-1: #151C23;
+    --surface-2: #151C23;
     --text-primary: #E6EBF0;
     --text-secondary: #A6B2BE;
     --text-muted: #7E8B97;
@@ -149,6 +158,99 @@
   .sf-pv-tbl table { border-collapse: collapse; font-size: 11.5px; }
   .sf-pv-tbl th, .sf-pv-tbl td { border: 1px solid var(--border-strong); padding: 3px 6px; text-align: left; vertical-align: top; }
   .sf-preview ul { margin: 4px 0 4px 18px; padding: 0; }
+
+  /* ================= v2 look: industrial signage ================= */
+  body { font-size: 15px; line-height: 1.45; -webkit-font-smoothing: antialiased; }
+  #app { padding-bottom: 86px; }
+  .topbar { background: var(--ink); color: #fff; border-bottom: none; padding: 14px 16px 16px; position: relative; }
+  .topbar::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 5px; background: repeating-linear-gradient(-45deg, var(--amber) 0 9px, var(--ink) 9px 18px); }
+  .topbar img { width: 38px; height: 38px; border-radius: 9px; background: #fff; }
+  .topbar-title { font-family: var(--font-head); font-size: 19px; font-weight: 700; letter-spacing: 0.01em; color: #fff; }
+  .topbar-sub { font-size: 11.5px; color: rgba(255,255,255,0.62); margin-top: 0; }
+  .screen { padding: 16px 16px 20px; }
+  .tabbar { background: var(--surface-1); border-top: 1px solid var(--border); box-shadow: 0 -4px 18px rgba(16,28,40,0.06); padding-bottom: env(safe-area-inset-bottom); }
+  .tab { position: relative; padding: 10px 0 9px; }
+  .tab.active { color: var(--navy); }
+  .tab.active::before { content: ""; position: absolute; top: 0; left: 24%; right: 24%; height: 3px; border-radius: 0 0 3px 3px; background: var(--amber); }
+  .tab-label { font-size: 11px; font-weight: 500; }
+  .tab.active .tab-label { font-weight: 600; }
+  .card { border-radius: 16px; padding: 16px; box-shadow: 0 1px 2px rgba(16,28,40,0.05), 0 6px 18px rgba(16,28,40,0.04); }
+  .card-title { font-family: var(--font-head); font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+  .card-desc { font-size: 13.5px; line-height: 1.45; }
+  .icon-badge { border-radius: 12px; width: 40px; height: 40px; }
+  .btn { height: 46px; border-radius: 12px; font-size: 15px; font-weight: 600; font-family: var(--font-sans); }
+  .btn-sm { height: 34px; border-radius: 10px; font-size: 13px; }
+  .btn-primary { box-shadow: 0 2px 0 rgba(0,0,0,0.12); }
+  .input { height: 46px; border-radius: 12px; font-size: 15px; }
+  .textarea { border-radius: 12px; font-size: 15px; }
+  .label { font-size: 13px; font-weight: 500; color: var(--text-secondary); }
+  .section-title { font-family: var(--font-head); font-size: 17px; font-weight: 700; letter-spacing: 0; text-transform: none; color: var(--text-primary); margin: 22px 0 10px; }
+  .sf-h { font-family: var(--font-head); font-size: 21px; }
+  .sf-sec > summary { font-family: var(--font-head); font-size: 16px; font-weight: 700; }
+  .sf-item-title { font-size: 14.5px; }
+  .sf-bar > div { background: var(--amber); }
+  .sf-note { border-radius: 10px; }
+  .visually-hidden { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  /* ---- home dashboard ---- */
+  .hero { background: var(--ink); color: #fff; border-radius: 18px; padding: 18px 18px 16px; margin-bottom: 14px; position: relative; overflow: hidden; }
+  .hero::after { content: ""; position: absolute; right: -28px; top: -28px; width: 120px; height: 120px; border-radius: 50%; border: 22px solid rgba(245,163,0,0.16); }
+  .hero-hello { font-family: var(--font-head); font-size: 25px; font-weight: 700; margin: 0; line-height: 1.15; position: relative; }
+  .hero-co { font-size: 14px; color: rgba(255,255,255,0.7); margin: 3px 0 12px; position: relative; }
+  .hero-chips { display: flex; flex-wrap: wrap; gap: 6px; position: relative; }
+  .chip { font-size: 12.5px; font-weight: 600; padding: 4px 10px; border-radius: 999px; background: var(--amber); color: #2B1D00; }
+  .chip-soft { background: rgba(255,255,255,0.14); color: #fff; font-weight: 500; }
+  .chip-warn { background: #FFD9D9; color: #7A1616; }
+  .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 4px; }
+  .kpis.two { grid-template-columns: repeat(2, 1fr); }
+  .kpi { background: var(--surface-1); border: 1px solid var(--border); border-radius: 14px; padding: 12px 11px 11px; }
+  .kpi-l { font-size: 12px; color: var(--text-secondary); margin: 0; line-height: 1.25; min-height: 30px; }
+  .kpi-v { font-family: var(--font-head); font-size: 26px; font-weight: 700; margin: 4px 0 6px; line-height: 1; }
+  .kpi-v small { font-size: 14px; font-weight: 500; color: var(--text-muted); }
+  .kpi-bar { height: 6px; border-radius: 4px; background: var(--border); overflow: hidden; }
+  .kpi-bar > div { height: 100%; background: var(--steel); border-radius: 4px; width: 0; transition: width .5s ease; }
+  .kpi-s { font-size: 11.5px; color: var(--text-muted); margin: 6px 0 0; }
+  .kpi.bad .kpi-v { color: var(--text-danger); }
+  .kpi.ok .kpi-v { color: var(--text-success); }
+  .attn { display: flex; gap: 10px; align-items: center; width: 100%; text-align: left; font-family: inherit; color: inherit; background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; cursor: pointer; }
+  .attn:active { transform: scale(0.99); }
+  .attn-dot { width: 10px; height: 10px; border-radius: 50%; flex: none; background: var(--text-muted); }
+  .attn-dot.red { background: #D64545; } .attn-dot.amber { background: var(--amber); }
+  .attn-main { flex: 1; min-width: 0; }
+  .attn-t { font-size: 14px; font-weight: 600; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .attn-s { font-size: 12px; color: var(--text-secondary); margin: 1px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .attn-b { font-size: 11.5px; font-weight: 700; padding: 3px 8px; border-radius: 7px; white-space: nowrap; }
+  .attn-b.red { background: var(--bg-danger); color: var(--text-danger); }
+  .attn-b.amber { background: var(--bg-warning); color: var(--text-warning); }
+  .attn-b.grey { background: var(--surface-0); color: var(--text-muted); border: 1px solid var(--border); }
+  .attn-empty { background: var(--bg-success); color: var(--text-success); border-radius: 12px; padding: 12px; font-size: 14px; }
+  .qa-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .qa { text-align: left; font-family: inherit; color: var(--text-primary); background: var(--surface-1); border: 1px solid var(--border); border-radius: 16px; padding: 14px; cursor: pointer; display: block; width: 100%; box-shadow: 0 1px 2px rgba(16,28,40,0.05); }
+  .qa:active { transform: scale(0.98); }
+  .qa .ic { width: 38px; height: 38px; border-radius: 11px; background: var(--accent-bg); display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+  .qa .ic svg { width: 20px; height: 20px; stroke: #fff; fill: none; stroke-width: 2; }
+  .qa.hi .ic { background: var(--amber); } .qa.hi .ic svg { stroke: #2B1D00; }
+  .qa-t { font-family: var(--font-head); font-size: 16px; font-weight: 700; margin: 0; }
+  .qa-s { font-size: 12.5px; color: var(--text-secondary); margin: 2px 0 0; line-height: 1.35; }
+
+  /* ---- assistant ---- */
+  #screen-assistant { padding-bottom: 8px; }
+  .as-log { display: flex; flex-direction: column; gap: 10px; min-height: 40vh; padding-bottom: 8px; }
+  .as-msg { max-width: 88%; padding: 10px 13px; border-radius: 16px; font-size: 15px; line-height: 1.45; word-wrap: break-word; }
+  .as-msg.user { align-self: flex-end; background: var(--accent-bg); color: #fff; border-bottom-right-radius: 5px; }
+  .as-msg.bot { align-self: flex-start; background: var(--surface-1); border: 1px solid var(--border); border-bottom-left-radius: 5px; }
+  .as-msg.err { align-self: flex-start; background: var(--bg-danger); color: var(--text-danger); }
+  .as-typing { color: var(--text-muted); font-size: 14px; }
+  .as-sug { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 10px; }
+  .as-chip { font-family: inherit; font-size: 13.5px; background: var(--surface-1); color: var(--text-primary); border: 1px solid var(--border-strong); border-radius: 999px; padding: 8px 12px; cursor: pointer; text-align: left; }
+  .as-bar { position: sticky; bottom: 78px; display: flex; gap: 8px; align-items: flex-end; background: var(--surface-0); padding: 8px 0 6px; }
+  .as-bar textarea { flex: 1; min-height: 46px; max-height: 120px; resize: none; font-family: inherit; font-size: 15px; padding: 11px 12px; border-radius: 14px; border: 1px solid var(--border-strong); background: var(--surface-1); color: var(--text-primary); }
+  .as-send { width: 46px; height: 46px; border-radius: 14px; border: none; background: var(--amber); cursor: pointer; display: flex; align-items: center; justify-content: center; flex: none; }
+  .as-send:disabled { opacity: .5; }
+  .as-send svg { width: 21px; height: 21px; stroke: #2B1D00; fill: none; stroke-width: 2.2; }
+  .sf-date { height: 34px; font-family: inherit; font-size: 13px; padding: 0 8px; border-radius: 10px; border: 1px solid var(--border-strong); background: var(--surface-1); color: var(--text-primary); }
+  .sf-exp { flex: 1 1 100%; display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text-secondary); flex-wrap: wrap; }
+  .sf-exp .attn-b { font-size: 11px; }
 </style>
 <script>
 (function() {
@@ -327,35 +429,35 @@
 
   <!-- HOME -->
   <div class="screen active" id="screen-home">
-    <p style="font-size:18px; font-weight:700; margin:16px 0 4px;">Welcome back</p>
-    <p style="font-size:13px; color:var(--text-secondary); margin:0 0 1.25rem;">Your safety command center.</p>
-    <p id="plan-usage-banner" style="font-size:12px; color:var(--text-secondary); background:var(--surface-1); border:1px solid var(--border); border-radius:8px; padding:8px 12px; margin-bottom:1rem;"></p>
+    <div class="hero">
+      <p class="hero-hello" id="hero-hello">Welcome back</p>
+      <p class="hero-co" id="hero-co">Your safety command center</p>
+      <div class="hero-chips"><span class="chip" id="hero-plan" style="display:none;"></span><span class="chip chip-soft" id="hero-renew" style="display:none;"></span></div>
+    </div>
+    <p id="plan-usage-banner" class="visually-hidden"></p>
 
-    <div class="card" style="margin-bottom:14px;">
-      <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div>
-      <p class="card-title">Risk Assessments</p>
-      <p class="card-desc">Create and manage workplace risk assessments</p>
-      <div class="card-stat-row"><span class="card-stat-label">Entries this session</span><span class="card-stat-value" id="home-count">0</span></div>
-      <div class="card-stat-row" style="margin-bottom:14px;"><span class="card-stat-label">Awaiting export</span><span class="card-stat-value" id="home-pending">0</span></div>
-      <button class="btn btn-primary" onclick="goTab('new')">Start New Assessment</button>
+    <div class="kpis" id="kpis">
+      <div class="kpi"><p class="kpi-l">Assessments this month</p><p class="kpi-v" id="kpi-ass">0</p><div class="kpi-bar"><div id="kpi-ass-bar"></div></div><p class="kpi-s" id="kpi-ass-sub"></p></div>
+      <div class="kpi" id="kpi-sf-tile" style="display:none;"><p class="kpi-l">Safety file complete</p><p class="kpi-v" id="kpi-sf">0<small>%</small></p><div class="kpi-bar"><div id="kpi-sf-bar"></div></div><p class="kpi-s" id="kpi-sf-sub"></p></div>
+      <div class="kpi" id="kpi-at-tile" style="display:none;"><p class="kpi-l" id="kpi-at-label">Expired or expiring</p><p class="kpi-v" id="kpi-at">0</p><p class="kpi-s" id="kpi-at-sub"></p></div>
     </div>
 
-    <div class="card" style="margin-bottom:14px;">
-      <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg></div>
-      <p class="card-title">Saved Entries</p>
-      <p class="card-desc">Review everything generated this session, ready to export</p>
-      <button class="btn" onclick="goTab('history')">View Saved Entries</button>
+    <div id="home-attn-wrap" style="display:none;">
+      <p class="section-title">Needs attention</p>
+      <div id="home-attn"></div>
     </div>
 
-    <div class="card" id="home-safety-card" style="margin-bottom:14px; display:none;">
-      <div class="icon-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div>
-      <p class="card-title" id="home-safety-title">Safety File</p>
-      <p class="card-desc">Build a complete site safety file: the index, your documents, blank registers and AI-written plans</p>
-      <button class="btn btn-primary" onclick="openSafety()">Open Safety Files</button>
+    <p class="section-title">Quick actions</p>
+    <div class="qa-grid">
+      <button class="qa hi" onclick="goTab('new')"><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div><p class="qa-t">New assessment</p><p class="qa-s">Write a risk assessment with AI</p></button>
+      <button class="qa" id="home-safety-card" style="display:none;" onclick="openSafety()"><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div><p class="qa-t" id="home-safety-title">Safety File</p><p class="qa-s">Index, documents and registers</p></button>
+      <button class="qa" onclick="goTab('assistant')"><div class="ic"><svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 01-11.6 7.1L4 20l1-4.6A8 8 0 1121 12z"/></svg></div><p class="qa-t">Assistant</p><p class="qa-s">Ask a safety question</p></button>
+      <button class="qa" onclick="goTab('history')"><div class="ic"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg></div><p class="qa-t">Saved entries</p><p class="qa-s"><span id="home-count">0</span> this session<span id="home-pending" style="display:none;">0</span></p></button>
+      <button class="qa" onclick="goTab('template')"><div class="ic"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg></div><p class="qa-t">My template</p><p class="qa-s">Your company's format</p></button>
     </div>
 
-    <p class="section-title" style="margin-top:1.5rem;">Recent activity</p>
-    <div id="home-recent"><p style="font-size:12px; color:var(--text-muted);">Nothing yet — generate your first assessment to see it here.</p></div>
+    <p class="section-title">Recent activity</p>
+    <div id="home-recent"><p style="font-size:13px; color:var(--text-muted);">Nothing yet. Generate your first assessment to see it here.</p></div>
   </div>
 
   <!-- NEW ASSESSMENT -->
@@ -498,6 +600,16 @@
     <input type="file" id="sf-logo" style="display:none" accept="image/png,image/jpeg">
   </div>
 
+  <div class="screen" id="screen-assistant">
+    <div class="as-log" id="as-log"></div>
+    <div class="as-sug" id="as-sug"></div>
+    <div class="as-bar">
+      <textarea id="as-input" rows="1" maxlength="1500" placeholder="Ask a safety question"></textarea>
+      <button class="as-send" id="as-send" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    </div>
+    <p class="sf-hint" style="text-align:center;">AI guidance, not legal advice. A competent person must review safety decisions.</p>
+  </div>
+
   <div class="tabbar">
     <button class="tab active" data-tab="home" onclick="goTab('home')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
@@ -507,13 +619,13 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
       <div class="tab-label">New</div>
     </button>
-    <button class="tab" data-tab="history" onclick="goTab('history')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
-      <div class="tab-label">History</div>
+    <button class="tab" id="tab-safety" data-tab="safety" style="display:none;" onclick="openSafety()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+      <div class="tab-label">Safety File</div>
     </button>
-    <button class="tab" data-tab="template" onclick="goTab('template')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
-      <div class="tab-label">Template</div>
+    <button class="tab" data-tab="assistant" onclick="goTab('assistant')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12a8 8 0 01-11.6 7.1L4 20l1-4.6A8 8 0 1121 12z"/></svg>
+      <div class="tab-label">Assistant</div>
     </button>
     <button class="tab" data-tab="settings" onclick="goTab('settings')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33h0a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51h0a1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82v0a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
@@ -619,7 +731,126 @@
     var cap = me.limits.assessments === null ? 'Unlimited' : (used + ' / ' + me.limits.assessments);
     var tag = me.is_admin ? 'Admin (free)' : (me.plan_label + ' plan');
     banner.textContent = me.company.name + ' - ' + tag + ' - Assessments this month: ' + cap;
+    renderHome();
   }
+
+  // ---------- Home dashboard ----------
+  var dash = null, dashAt = 0;
+  function dayWord() { var h = new Date().getHours(); return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening'; }
+  function setBar(id, pct) { var el = $(id); if (el) el.style.width = Math.max(0, Math.min(100, pct)) + '%'; }
+  function renderHome() {
+    if (!me || !$('hero-hello')) return;
+    $('hero-hello').textContent = dayWord();
+    $('hero-co').textContent = me.company.name;
+    var plan = $('hero-plan'); plan.style.display = ''; plan.textContent = me.is_admin ? 'Admin (free access)' : me.plan_label + ' plan';
+    var rn = $('hero-renew'); rn.style.display = 'none'; rn.className = 'chip chip-soft';
+    if (!me.is_admin && me.period_end) {
+      var days = Math.ceil((new Date(me.period_end).getTime() - Date.now()) / 86400e3);
+      rn.style.display = '';
+      if (days < 0) { rn.textContent = 'Access ended'; rn.className = 'chip chip-warn'; }
+      else { rn.textContent = days + (days === 1 ? ' day' : ' days') + ' left in this period'; if (days <= 3) rn.className = 'chip chip-warn'; }
+    }
+    var used = (me.usage && me.usage.assessments_used) || 0, lim = me.limits && me.limits.assessments;
+    $('kpi-ass').innerHTML = lim === null ? String(used) : used + '<small> / ' + lim + '</small>';
+    setBar('kpi-ass-bar', lim === null ? 100 : (lim ? used / lim * 100 : 0));
+    $('kpi-ass-sub').textContent = lim === null ? 'Unlimited plan' : Math.max(0, lim - used) + ' left';
+    var feat = !!(me.features && me.features.safety_file);
+    $('kpi-sf-tile').style.display = feat ? '' : 'none';
+    $('kpi-at-tile').style.display = feat ? '' : 'none';
+    $('kpis').className = 'kpis' + (feat ? '' : ' two');
+    var wrap = $('home-attn-wrap');
+    if (!feat) { wrap.style.display = 'none'; return; }
+    var hasFiles = dash && dash.files && dash.files.length;
+    if (dash && hasFiles) {
+      var avg = Math.round(dash.files.reduce(function(a, f) { return a + (f.progress.percent || 0); }, 0) / dash.files.length);
+      $('kpi-sf').innerHTML = avg + '<small>%</small>'; setBar('kpi-sf-bar', avg);
+      $('kpi-sf-sub').textContent = dash.files.length + (dash.files.length === 1 ? ' file' : ' files');
+      var bad = dash.totals.expired + dash.totals.expiring;
+      $('kpi-at').textContent = bad; $('kpi-at-tile').className = 'kpi' + (bad ? ' bad' : ' ok');
+      $('kpi-at-label').textContent = 'Expired or expiring';
+      $('kpi-at-sub').textContent = dash.totals.missing + ' documents missing';
+    } else {
+      $('kpi-sf').innerHTML = '0<small>%</small>'; setBar('kpi-sf-bar', 0); $('kpi-sf-sub').textContent = dash ? 'No file yet' : 'Loading...';
+      $('kpi-at').textContent = '0'; $('kpi-at-tile').className = 'kpi'; $('kpi-at-sub').textContent = '';
+    }
+    wrap.style.display = dash ? '' : 'none';
+    var h = '';
+    if (dash && !hasFiles) {
+      h = '<div class="card"><p class="card-title">Start your first safety file</p><p class="card-desc">Create one for a site and get the full index, AI-written plans and blank registers.</p><button class="btn btn-primary" onclick="openSafety()">Open Safety Files</button></div>';
+    } else if (dash) {
+      var rows = [];
+      dash.expiring.forEach(function(e) {
+        var t = e.days < 0 ? 'Expired ' + (-e.days) + (e.days === -1 ? ' day ago' : ' days ago') : e.days === 0 ? 'Expires today' : 'Expires in ' + e.days + (e.days === 1 ? ' day' : ' days');
+        rows.push({ cls: e.days < 0 ? 'red' : 'amber', t: e.key + ' ' + e.title, s: e.file_name, b: t, id: e.file_id });
+      });
+      dash.missing.forEach(function(m) { rows.push({ cls: 'grey', t: m.key + ' ' + m.title, s: m.file_name, b: 'Missing', id: m.file_id }); });
+      rows = rows.slice(0, 7);
+      if (!rows.length) h = '<div class="attn-empty">Everything in your safety files is up to date.</div>';
+      rows.forEach(function(r) {
+        h += '<button class="attn" data-open-file="' + sfAttr(r.id) + '"><span class="attn-dot ' + (r.cls === 'grey' ? '' : r.cls) + '"></span><span class="attn-main"><p class="attn-t">' + escapeHtml(r.t) + '</p><p class="attn-s">' + escapeHtml(r.s) + '</p></span><span class="attn-b ' + r.cls + '">' + escapeHtml(r.b) + '</span></button>';
+      });
+    }
+    $('home-attn').innerHTML = h;
+  }
+  async function loadDashboard(force) {
+    if (!me || !(me.features && me.features.safety_file)) { renderHome(); return; }
+    if (!force && dash && Date.now() - dashAt < 20000) return;
+    try {
+      var res = await apiFetch('/api/safety-files/dashboard');
+      if (res.ok) { dash = await res.json(); dashAt = Date.now(); }
+    } catch (e) {}
+    renderHome();
+  }
+  document.addEventListener('click', function(e) {
+    var b = e.target.closest ? e.target.closest('[data-open-file]') : null;
+    if (!b) return;
+    var id = b.getAttribute('data-open-file');
+    goTab('safety'); sf.msg = ''; sfRefreshAfter(function() { return sfLoadFile(id); });
+  });
+
+  // ---------- Virtual assistant ----------
+  var as = { msgs: [], busy: false, started: false };
+  var AS_SUGGEST = ['What goes into a site safety file?', 'How do I write a good toolbox talk?', 'How do I use my own risk assessment template?', 'When is a fall protection plan needed?'];
+  function asFormat(t) { return escapeHtml(t).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>'); }
+  function asRender() {
+    var log = $('as-log'); if (!log) return;
+    var h = '<div class="as-msg bot">Hi, I am your safety assistant. Ask me about safety procedures, risk assessments, South African safety law (guidance only), or how to use this app.</div>';
+    as.msgs.forEach(function(m) { h += '<div class="as-msg ' + (m.err ? 'err' : m.role === 'user' ? 'user' : 'bot') + '">' + asFormat(m.content) + '</div>'; });
+    if (as.busy) h += '<div class="as-msg bot as-typing">Thinking...</div>';
+    log.innerHTML = h;
+    $('as-sug').style.display = as.msgs.length ? 'none' : 'flex';
+    $('as-send').disabled = as.busy;
+    window.scrollTo(0, document.body.scrollHeight);
+  }
+  function asInit() {
+    if (!as.started) {
+      as.started = true;
+      $('as-sug').innerHTML = AS_SUGGEST.map(function(q) { return '<button class="as-chip" data-q="' + sfAttr(q) + '">' + escapeHtml(q) + '</button>'; }).join('');
+    }
+    asRender();
+  }
+  async function asSend(text) {
+    text = (text || '').trim();
+    if (!text || as.busy) return;
+    as.msgs.push({ role: 'user', content: text });
+    as.busy = true; $('as-input').value = ''; asRender();
+    try {
+      var payload = as.msgs.filter(function(m) { return !m.err; }).map(function(m) { return { role: m.role, content: m.content }; });
+      var res = await apiFetch('/api/assistant', { method: 'POST', body: JSON.stringify({ messages: payload }) });
+      var d = await res.json().catch(function() { return {}; });
+      if (!res.ok) throw new Error(d.error || 'The assistant is not available right now. Please try again.');
+      as.msgs.push({ role: 'assistant', content: d.reply });
+    } catch (e) { as.msgs.push({ role: 'assistant', content: e.message, err: true }); }
+    as.busy = false; asRender();
+  }
+  document.addEventListener('click', function(e) {
+    var c = e.target.closest ? e.target.closest('.as-chip') : null;
+    if (c) asSend(c.getAttribute('data-q'));
+    if (e.target.closest && e.target.closest('#as-send')) asSend($('as-input').value);
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.target && e.target.id === 'as-input' && e.key === 'Enter' && !e.shiftKey && window.innerWidth > 700) { e.preventDefault(); asSend(e.target.value); }
+  });
 
   async function pollForActivation() {
     showScreen('subscribe');
@@ -1084,6 +1315,13 @@
       return '';
     }).join('');
   }
+  function sfExpBadge(x) {
+    if (!x) return '';
+    var days = Math.round((new Date(x + 'T00:00:00Z').getTime() - new Date(new Date().toISOString().slice(0, 10) + 'T00:00:00Z').getTime()) / 86400e3);
+    if (days < 0) return '<span class="attn-b red">Expired</span>';
+    if (days <= 30) return '<span class="attn-b amber">' + (days === 0 ? 'Today' : days + ' days') + '</span>';
+    return '';
+  }
   function sfItemHtml(it) {
     var st = sf.cur.items[it.key] || { status: 'missing', docs: [], na: false };
     var busy = !!sf.busy[it.key];
@@ -1097,7 +1335,8 @@
     h += '<button class="btn btn-sm" data-act="up" data-key="' + it.key + '">Upload file</button>';
     h += '<button class="btn btn-sm" data-act="na" data-key="' + it.key + '">' + (st.na ? 'Mark applicable' : 'Not applicable') + '</button></div>';
     if (st.docs.length) h += '<div class="sf-docs">' + st.docs.map(function(d) {
-      return '<div class="sf-doc"><span class="sf-doc-name">' + escapeHtml(d.name) + ' <em>(' + sfSize(d.size) + ')</em></span><button class="btn btn-sm" data-act="dldoc" data-id="' + d.id + '" data-name="' + sfAttr(d.name) + '">Download</button><button class="btn btn-sm" data-act="deldoc" data-id="' + d.id + '">Delete</button></div>';
+      var exp = '<div class="sf-exp">Expiry date <input type="date" class="sf-date" data-doc="' + d.id + '" value="' + sfAttr(d.expires || '') + '">' + sfExpBadge(d.expires) + '</div>';
+      return '<div class="sf-doc"><span class="sf-doc-name">' + escapeHtml(d.name) + ' <em>(' + sfSize(d.size) + ')</em></span>' + exp + '<button class="btn btn-sm" data-act="dldoc" data-id="' + d.id + '" data-name="' + sfAttr(d.name) + '">Download</button><button class="btn btn-sm" data-act="deldoc" data-id="' + d.id + '">Delete</button></div>';
     }).join('') + '</div>';
     h += '<div class="sf-preview" id="sf-pv-' + it.key.replace('.', '-') + '"></div></div>';
     return h;
@@ -1163,6 +1402,7 @@
     if (!card) return;
     var on = me && me.features && me.features.safety_file;
     card.style.display = on ? 'block' : 'none';
+    var st = $('tab-safety'); if (st) st.style.display = on ? '' : 'none';
     $('home-safety-title').textContent = on && !me.features.safety_file_public ? 'Safety File (admin preview)' : 'Safety File';
   }
 
@@ -1197,7 +1437,7 @@
           }
         } else if (st.generated) {
           var content = await sfContent(it.key);
-          folder.file(base + ' (DRAFT).docx', await buildDocxBlob(content, { note: SF_DRAFT_NOTE }));
+          folder.file(base + (it.kind === 'form' ? ' (blank form).docx' : ' (DRAFT).docx'), await buildDocxBlob(content, { note: it.kind === 'form' ? '' : SF_DRAFT_NOTE }));
           files.push('Draft Word file');
         }
         rows.push([it.key, it.title, status, files.join(', ')]);
@@ -1209,7 +1449,7 @@
       { type: 'p', text: p.percent + '% complete. Done: ' + p.done + ', draft only: ' + p.draft + ', missing: ' + p.missing + ', not applicable: ' + p.na + '.' },
       { type: 'table', headers: ['No.', 'Document', 'Status', 'File'], rows: rows }
     ] };
-    zip.file('00 Index.docx', await buildDocxBlob(idx, { note: SF_DRAFT_NOTE }));
+    zip.file('00 Index.docx', await buildDocxBlob(idx, { note: '' }));
     return zip.generateAsync({ type: 'blob' });
   }
 
@@ -1270,7 +1510,7 @@
     else if (act === 'dldraft') {
       sfRefreshAfter(async function() {
         var it = sfFind(key), c = await sfContent(key);
-        sfSave(await buildDocxBlob(c, { note: SF_DRAFT_NOTE }), sfShort(sfClean(key + ' ' + it.title), 70) + ' (DRAFT).docx');
+        sfSave(await buildDocxBlob(c, { note: it.kind === 'form' ? '' : SF_DRAFT_NOTE }), sfShort(sfClean(key + ' ' + it.title), 70) + (it.kind === 'form' ? ' (blank form).docx' : ' (DRAFT).docx'));
       });
     }
     else if (act === 'na') {
@@ -1335,6 +1575,16 @@
       sf.editing.name = cur.name; sf.editing.answers = cur.answers; sf.editing.answers.letter_logo = d; sf.msg = ''; sfRender();
     }).catch(function(er) { sf.editing.name = cur.name; sf.editing.answers = cur.answers; sf.msg = er.message; sfRender(); });
   });
+  document.addEventListener('change', function(e) {
+    var t = e.target;
+    if (!t || !t.classList || !t.classList.contains('sf-date')) return;
+    var id = t.getAttribute('data-doc'), v = t.value;
+    sfRefreshAfter(async function() {
+      await sfPost('/api/safety-files/' + sf.cur.file.id + '/docs/' + id + '/expiry', { expires: v });
+      dashAt = 0;
+      await sfLoadFile(sf.cur.file.id, true);
+    });
+  });
   $('sf-file').addEventListener('change', function() {
     var f = this.files && this.files[0], key = this.getAttribute('data-key');
     if (!f || !key) return;
@@ -1368,16 +1618,19 @@
 
   var entries = [];
   var templateEntries = [];
-  var titles = { home: 'Home', new: 'New Assessment', history: 'History', template: 'Template', settings: 'Settings', safety: 'Safety File' };
+  var titles = { home: 'Home', new: 'New Assessment', history: 'History', template: 'Template', settings: 'Settings', safety: 'Safety File', assistant: 'Assistant' };
   var templateState = null; // { workbook, sheetName, headerRowIndex, columns, fileName }
 
   window.goTab = function(name) {
     document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
     document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
     document.getElementById('screen-' + name).classList.add('active');
-    var tb = document.querySelector('.tab[data-tab="' + name + '"]'); if (tb) tb.classList.add('active');
+    var tabName = (name === 'history' || name === 'template') ? 'home' : name;
+    var tb = document.querySelector('.tab[data-tab="' + tabName + '"]'); if (tb) tb.classList.add('active');
     document.getElementById('topbar-title').textContent = titles[name];
     window.scrollTo(0, 0);
+    if (name === 'home') loadDashboard();
+    if (name === 'assistant') asInit();
   };
 
   var riskColors = {
