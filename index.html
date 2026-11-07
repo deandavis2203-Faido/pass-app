@@ -4,6 +4,9 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Pro Active Safety Solutions</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#101C28">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
@@ -192,6 +195,9 @@
   .sf-note { border-radius: 10px; }
   .visually-hidden { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
+  .off-pill { margin-left: auto; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: var(--amber); color: #2B1D00; align-self: center; }
+  .q-card { background: var(--bg-warning); color: var(--text-warning); border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; font-size: 13px; }
+  .q-card strong { display: block; font-size: 14px; }
   /* ---- home dashboard ---- */
   .hero { background: var(--ink); color: #fff; border-radius: 18px; padding: 18px 18px 16px; margin-bottom: 14px; position: relative; overflow: hidden; }
   .hero::after { content: ""; position: absolute; right: -28px; top: -28px; width: 120px; height: 120px; border-radius: 50%; border: 22px solid rgba(245,163,0,0.16); }
@@ -296,9 +302,9 @@
     <label class="label">Choose a plan</label>
     <select class="input" id="register-plan" style="margin-bottom:12px;">
       <option value="starter">Starter — R1,500/mo — 5 assessments, 2 users</option>
-      <option value="entry">Entry — R4,500/mo — 10 assessments, 10 users</option>
-      <option value="medium">Medium — R5,999/mo — 25 assessments, 15 users</option>
-      <option value="unlimited">Unlimited — R8,999/mo — Unlimited assessments & sites, offline mode</option>
+      <option value="entry">Entry — R4,500/mo — 10 assessments, 10 users, 1 safety file</option>
+      <option value="medium">Medium — R5,999/mo — 25 assessments, 15 users, 3 safety files</option>
+      <option value="unlimited">Unlimited — R8,999/mo — Unlimited assessments, safety files & sites, offline mode</option>
     </select>
     <label style="display:flex; gap:8px; align-items:flex-start; font-size:12px; color:var(--text-secondary); margin:0 0 10px; line-height:1.5;">
       <input type="checkbox" id="register-terms" style="margin-top:3px;" />
@@ -346,7 +352,7 @@
 <tr><td>Entry</td><td>R4,500</td><td>10</td><td>10</td></tr>
 <tr><td>Medium</td><td>R5,999</td><td>25</td><td>15</td></tr>
 <tr><td>Unlimited</td><td>R8,999</td><td>Unlimited</td><td>Unlimited</td></tr></table>
-<p>Prices are in South African Rand. The Unlimited plan also includes unlimited sites and offline mode, which will be made available to Unlimited customers as it is released. Monthly assessment counts reset at the start of each calendar month; unused assessments do not carry over. When your plan limit is reached you can upgrade or wait for the next month.</p>
+<p>Prices are in South African Rand. The Unlimited plan also includes unlimited sites and offline mode. Offline mode lets you open the app and read saved work without signal and queue new assessments, which are generated when signal returns; uploading documents and AI drafting need signal. Safety files are included as follows: Starter none, Entry 1, Medium 3, Unlimited unlimited. Monthly assessment counts reset at the start of each calendar month; unused assessments do not carry over. When your plan limit is reached you can upgrade or wait for the next month.</p>
 
 <h2>6. Payment</h2>
 <p>Fees are charged monthly in advance by recurring card or instant EFT payment through PayFast. We do not store your card details. Your subscription starts when PayFast confirms your first payment, and renews every month until cancelled. If a payment fails, your account is marked past due and access may continue for up to 7 days while payment is retried. Access is then suspended until payment is made.</p>
@@ -404,9 +410,9 @@
     <label class="label">Choose your plan</label>
     <select class="input" id="sub-plan" style="margin-bottom:12px;">
       <option value="starter">Starter - R1,500/mo - 5 assessments, 2 users</option>
-      <option value="entry">Entry - R4,500/mo - 10 assessments, 10 users</option>
-      <option value="medium">Medium - R5,999/mo - 25 assessments, 15 users</option>
-      <option value="unlimited">Unlimited - R8,999/mo - Unlimited assessments &amp; sites, offline mode</option>
+      <option value="entry">Entry - R4,500/mo - 10 assessments, 10 users, 1 safety file</option>
+      <option value="medium">Medium - R5,999/mo - 25 assessments, 15 users, 3 safety files</option>
+      <option value="unlimited">Unlimited - R8,999/mo - Unlimited assessments, safety files &amp; sites, offline mode</option>
     </select>
     <p style="font-size:12px; color:var(--text-secondary); margin:0 0 12px; line-height:1.6;">Billed monthly through PayFast (card or instant EFT). Cancel any time from your PayFast account.</p>
     <p id="sub-sandbox" style="display:none; font-size:12px; color:var(--text-warning); background:var(--bg-warning); border-radius:8px; padding:8px 10px; margin:0 0 12px;">TEST MODE: no real money is taken.</p>
@@ -425,6 +431,7 @@
       <p class="topbar-title" id="topbar-title">Home</p>
       <p class="topbar-sub">Pro Active Safety Solutions</p>
     </div>
+    <span class="off-pill" id="offline-pill" style="display:none;">Offline</span>
   </div>
 
   <!-- HOME -->
@@ -499,6 +506,7 @@
   <!-- HISTORY -->
   <div class="screen" id="screen-history">
     <p class="section-title">Saved entries (<span id="pass-count">0</span>)</p>
+    <div id="pass-queue"></div>
     <div id="pass-list"><p style="font-size:12px; color:var(--text-muted);">No entries yet. Add one from the New tab.</p></div>
     <button class="btn btn-primary" id="pass-export-btn" style="margin-top:1rem;">Export to Excel</button>
     <p class="err" id="pass-export-err" style="display:none;"></p>
@@ -554,6 +562,11 @@
     <div class="card">
       <p style="font-size:13px; font-weight:600; margin:0 0 6px;">Template mapping</p>
       <p style="font-size:12px; color:var(--text-secondary); margin:0; line-height:1.6;">Exports are structured to match the Hazard WRAC sheet of the IBRA workbook format.</p>
+    </div>
+    <div class="card" style="margin-top:10px;" id="offline-card">
+      <p style="font-size:13px; font-weight:600; margin:0 0 6px;">Offline mode</p>
+      <p style="font-size:12px; color:var(--text-secondary); margin:0 0 8px; line-height:1.6;" id="offline-text"></p>
+      <button class="btn btn-sm" id="install-btn" style="display:none;">Install the app on this phone</button>
     </div>
         <div class="card" style="margin-top:10px;">
       <p style="font-size:13px; font-weight:600; margin:0 0 8px;">Appearance</p>
@@ -673,12 +686,81 @@
 
   async function loadMe() {
     var res = await apiFetch('/api/me');
-    if (res.status === 401) { await sb.auth.signOut(); me = null; return 'auth'; }
+    if (res.status === 401) { await sb.auth.signOut(); clearLocalData(); me = null; return 'auth'; }
     var data = await res.json().catch(function() { return {}; });
     if (!res.ok) throw new Error(data.error || 'Could not load your account.');
     me = data;
+    try { localStorage.setItem('pass_me_cache', JSON.stringify(me)); } catch (e) {}
     return 'ok';
   }
+
+  // ---------- Offline mode (Unlimited plan) ----------
+  // Works from a copy kept on the phone. The server still checks every request when signal returns.
+  function isNetErr(e) { return !!e && (e instanceof TypeError || /Failed to fetch|NetworkError|Load failed|network request failed/i.test(String(e.message || e))); }
+  function cachedMe() { try { var m = JSON.parse(localStorage.getItem('pass_me_cache') || 'null'); return m && m.company && m.limits && m.limits.offline ? m : null; } catch (e) { return null; } }
+  function offlineAllowed() { return !!(me && me.limits && me.limits.offline); }
+  function netUi() { var p = $('offline-pill'); if (p) p.style.display = (!navigator.onLine && offlineAllowed()) ? '' : 'none'; }
+  function lk(kind) { return 'pass_' + kind + '_' + (me && me.email ? me.email : ''); }
+  var queue = [], flushing = false, deferredInstall = null;
+  function persistLocal() { try { localStorage.setItem(lk('entries'), JSON.stringify(entries)); } catch (e) {} }
+  function saveQueue() { try { localStorage.setItem(lk('queue'), JSON.stringify(queue)); } catch (e) {} }
+  function restoreLocal() {
+    try { var e1 = JSON.parse(localStorage.getItem(lk('entries')) || '[]'); if (Array.isArray(e1)) entries = e1; } catch (e) {}
+    try { var q1 = JSON.parse(localStorage.getItem(lk('queue')) || '[]'); if (Array.isArray(q1)) queue = q1; } catch (e) {}
+    renderList(); renderQueue();
+  }
+  function clearLocalData() {
+    try { Object.keys(localStorage).forEach(function(k) { if (k.indexOf('pass_theme') !== 0) localStorage.removeItem(k); }); } catch (e) {}
+    entries = []; templateEntries = []; queue = []; dash = null;
+  }
+  function renderQueue() {
+    var el = $('pass-queue'); if (!el) return;
+    el.innerHTML = queue.map(function(q, i) {
+      return '<div class="q-card"><strong>' + (q.error ? 'Could not generate' : 'Waiting for signal') + ': ' + escapeHtml(q.activity || 'Assessment') + '</strong>' +
+        (q.error ? escapeHtml(q.error) : 'Saved on your phone. It will be generated automatically when you are back online.') +
+        '<div style="margin-top:6px"><button class="btn btn-sm" data-q-rm="' + i + '">Remove</button>' + (q.error ? ' <button class="btn btn-sm" data-q-retry="' + i + '">Try again</button>' : '') + '</div></div>';
+    }).join('');
+  }
+  document.addEventListener('click', function(e) {
+    var rm = e.target.closest ? e.target.closest('[data-q-rm]') : null, rt = e.target.closest ? e.target.closest('[data-q-retry]') : null;
+    if (rm) { queue.splice(parseInt(rm.getAttribute('data-q-rm'), 10), 1); saveQueue(); renderQueue(); }
+    if (rt) { var q = queue[parseInt(rt.getAttribute('data-q-retry'), 10)]; if (q) { delete q.error; saveQueue(); renderQueue(); flushQueue(); } }
+  });
+  async function flushQueue() {
+    if (flushing || !navigator.onLine || !queue.length) return;
+    flushing = true;
+    try {
+      for (var i = 0; i < queue.length;) {
+        var q = queue[i];
+        if (q.error) { i++; continue; }
+        try {
+          var res = await apiFetch(q.path, { method: 'POST', body: JSON.stringify(q.payload) });
+          var d = await res.json().catch(function() { return {}; });
+          if (!res.ok) { q.error = d.error || ('Error ' + res.status); i++; continue; }
+          (d.rows || []).forEach(function(r) { entries.push(r); });
+          queue.splice(i, 1);
+        } catch (e) { if (isNetErr(e)) break; q.error = 'Something went wrong. Try again.'; i++; }
+      }
+    } finally {
+      flushing = false; saveQueue(); persistLocal(); renderList(); renderQueue();
+      loadMe().then(refreshPlanUI).catch(function() {});
+    }
+  }
+  window.addEventListener('online', function() { netUi(); flushQueue(); if (me) { loadMe().then(refreshPlanUI).catch(function() {}); loadDashboard(true); } });
+  window.addEventListener('offline', netUi);
+  window.addEventListener('beforeinstallprompt', function(e) { e.preventDefault(); deferredInstall = e; setupOfflineCard(); });
+  function setupOfflineCard() {
+    var t = $('offline-text'), b = $('install-btn'); if (!t) return;
+    if (offlineAllowed()) {
+      t.textContent = 'Offline mode is on for your plan. Install the app on your phone and it opens with no signal. You can read your saved assessments and safety files, and write new assessments: they are saved on your phone and generated automatically when signal returns. Uploads and AI drafting need signal.';
+    } else {
+      t.textContent = 'Offline mode is included in the Unlimited plan. You can still install the app on your phone from your browser menu.';
+    }
+    b.style.display = deferredInstall ? '' : 'none';
+    b.onclick = function() { if (deferredInstall) { deferredInstall.prompt(); deferredInstall = null; b.style.display = 'none'; } };
+  }
+  function sfCacheGet(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }
+  function sfCacheSet(k, v) { try { var j = JSON.stringify(v); if (j.length < 1500000) localStorage.setItem(k, j); } catch (e) {} }
 
   async function loadMeAndRoute() {
     showScreen('boot');
@@ -689,6 +771,8 @@
       if (me.access) { enterApp(); return; }
       enterSubscribe();
     } catch (err) {
+      var cm = isNetErr(err) ? cachedMe() : null;
+      if (cm) { me = cm; enterApp(); return; }
       showScreen('auth');
       var e = $('login-err');
       e.textContent = err.message || 'Could not connect. Check your signal and try again.';
@@ -698,10 +782,14 @@
 
   function enterApp() {
     showScreen('app');
+    restoreLocal();
     refreshPlanUI();
     setupAdminCard();
     setupTeamCard();
     setupSafetyCard();
+    setupOfflineCard();
+    netUi();
+    flushQueue();
   }
 
   function enterSubscribe() {
@@ -1003,6 +1091,7 @@
 
   async function doLogout() {
     await sb.auth.signOut();
+    clearLocalData();
     me = null;
     showScreen('auth');
   }
@@ -1220,6 +1309,61 @@
     return '<w:tbl><w:tblPr><w:tblW w:w="' + total + '" w:type="dxa"/><w:tblBorders>' + bd + '</w:tblBorders><w:tblLayout w:type="fixed"/><w:tblCellMar><w:left w:w="80" w:type="dxa"/><w:right w:w="80" w:type="dxa"/></w:tblCellMar></w:tblPr>' +
       grid + tr(headers, true) + rows.map(function(r) { return tr(r, false); }).join('') + '</w:tbl><w:p/>';
   }
+  // ---------- Organisation chart (drawn as a picture so Word and print show boxes and lines) ----------
+  function sfOrgPng(nodes) {
+    var byId = {}, kids = {}, root = null;
+    nodes.forEach(function(n) { byId[n.id] = n; kids[n.id] = []; });
+    nodes.forEach(function(n) { if (n.parent && byId[n.parent]) kids[n.parent].push(n); else if (!root) root = n; });
+    if (!root) return null;
+    var BW = 176, BH = 66, GX = 16, GY = 46, PAD = 14, maxDepth = 0;
+    function width(n) { var k = kids[n.id]; if (!k.length) { n._w = BW; return BW; } var w = 0; k.forEach(function(c) { w += width(c); }); w += GX * (k.length - 1); n._w = Math.max(BW, w); n._cw = w; return n._w; }
+    function place(n, x, d) {
+      n._cx = x + n._w / 2; n._d = d; if (d > maxDepth) maxDepth = d;
+      var cx = x + (n._w - (n._cw || 0)) / 2;
+      kids[n.id].forEach(function(c) { place(c, cx, d + 1); cx += c._w + GX; });
+    }
+    width(root); place(root, 0, 0);
+    var W = root._w + PAD * 2, H = (maxDepth + 1) * BH + maxDepth * GY + PAD * 2;
+    var sc = Math.min(2, 4000 / W);
+    var cv = document.createElement('canvas'); cv.width = Math.round(W * sc); cv.height = Math.round(H * sc);
+    var cx = cv.getContext('2d'); cx.scale(sc, sc);
+    cx.fillStyle = '#ffffff'; cx.fillRect(0, 0, W, H);
+    var FONT = 'Arial, Helvetica, sans-serif';
+    function wrap(t, max, lines) {
+      var words = String(t).split(/\s+/), out = [], cur = '';
+      words.forEach(function(w) { var tt = cur ? cur + ' ' + w : w; if (cx.measureText(tt).width <= max || !cur) cur = tt; else { out.push(cur); cur = w; } });
+      if (cur) out.push(cur);
+      if (out.length > lines) { out = out.slice(0, lines); out[lines - 1] = out[lines - 1].replace(/.{0,3}$/, '...'); }
+      return out;
+    }
+    function bx(n) { return PAD + n._cx - BW / 2; }
+    function by(n) { return PAD + n._d * (BH + GY); }
+    // lines first
+    cx.strokeStyle = '#5B6B7A'; cx.lineWidth = 1.6;
+    nodes.forEach(function(n) {
+      var k = kids[n.id]; if (!k.length) return;
+      var py = by(n) + BH, midY = py + GY / 2, px = PAD + n._cx;
+      cx.beginPath(); cx.moveTo(px, py); cx.lineTo(px, midY);
+      var xs = k.map(function(c) { return PAD + c._cx; });
+      cx.moveTo(Math.min.apply(null, xs.concat([px])), midY); cx.lineTo(Math.max.apply(null, xs.concat([px])), midY);
+      k.forEach(function(c) { cx.moveTo(PAD + c._cx, midY); cx.lineTo(PAD + c._cx, by(c)); });
+      cx.stroke();
+    });
+    nodes.forEach(function(n) {
+      var x = bx(n), y = by(n), isRoot = n === root;
+      cx.fillStyle = isRoot ? '#16293B' : '#FFFFFF'; cx.strokeStyle = isRoot ? '#16293B' : '#2F6FA3'; cx.lineWidth = 1.8;
+      cx.beginPath(); if (cx.roundRect) cx.roundRect(x, y, BW, BH, 8); else cx.rect(x, y, BW, BH); cx.fill(); cx.stroke();
+      cx.fillStyle = isRoot ? '#FFFFFF' : '#16293B'; cx.textAlign = 'center'; cx.textBaseline = 'alphabetic';
+      cx.font = 'bold 13px ' + FONT;
+      var tl = wrap(n.title, BW - 14, 2), nm = n.name ? (cx.font = '12px ' + FONT, wrap(n.name, BW - 14, 1)) : [];
+      cx.font = 'bold 13px ' + FONT;
+      var total = tl.length * 15 + (nm.length ? 15 : 0), ty = y + (BH - total) / 2 + 12;
+      tl.forEach(function(l, i) { cx.fillText(l, x + BW / 2, ty + i * 15); });
+      if (nm.length) { cx.font = '12px ' + FONT; cx.fillStyle = isRoot ? '#D5E3F0' : '#4A5966'; cx.fillText(nm[0], x + BW / 2, ty + tl.length * 15); }
+    });
+    var url = cv.toDataURL('image/png');
+    return { dataUrl: url, b64: url.split(',')[1], w: W, h: H };
+  }
   function sfLetter(a) {
     a = a || (sf.cur && sf.cur.file && sf.cur.file.answers) || {};
     var L = { name: a.company_name || '', reg: a.letter_reg || '', address: a.letter_address || '', phone: a.letter_phone || '', email: a.letter_email || '', logo: a.letter_logo || '' };
@@ -1240,10 +1384,12 @@
   function buildDocxBlob(content, opts) {
     opts = opts || {};
     var L = opts.letter === undefined ? sfLetter() : opts.letter;
+    content.blocks.forEach(function(b) { if (b.type === 'orgchart' && b.nodes && !b._png) { try { b._png = sfOrgPng(b.nodes); } catch (e) { b._png = null; } } });
     return sfLogoDims(L).then(function(dims) { return buildDocxCore(content, opts, L, dims); });
   }
   function buildDocxCore(content, opts, L, dims) {
-    var landscape = content.blocks.some(function(b) { return b.type === 'table' && b.headers.length > 6; });
+    var landscape = content.blocks.some(function(b) { return (b.type === 'table' && b.headers.length > 6) || (b.type === 'orgchart' && b._png && b._png.w / b._png.h > 2.6); });
+    var orgImgs = [];
     var body = wPara(content.title, { style: 'Title' });
     if (opts.note) body += wPara(opts.note, { i: true, color: '7A6A00', sz: 18, after: 200 });
     content.blocks.forEach(function(b) {
@@ -1251,6 +1397,14 @@
       else if (b.type === 'p') body += wTextParas(b.text, { after: 120 });
       else if (b.type === 'bullets') b.items.forEach(function(it) { body += wPara('•  ' + it, { ind: 540, hang: 270, after: 60 }); });
       else if (b.type === 'table') body += wTable(b.headers, b.rows, landscape);
+      else if (b.type === 'orgchart' && b._png) {
+        var maxWin = landscape ? 10.2 : 6.9, maxHin = landscape ? 4.6 : 8.2;
+        var k = Math.min(maxWin / (b._png.w / 96), maxHin / (b._png.h / 96), 1.6);
+        var cxe = Math.round(b._png.w / 96 * k * 914400), cye = Math.round(b._png.h / 96 * k * 914400);
+        var n = orgImgs.length + 1, rid = 'rId' + (10 + n);
+        orgImgs.push({ rid: rid, name: 'org' + n + '.png', b64: b._png.b64 });
+        body += '<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="120" w:after="200"/></w:pPr><w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="' + cxe + '" cy="' + cye + '"/><wp:docPr id="' + (20 + n) + '" name="Organogram ' + n + '"/><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic><pic:nvPicPr><pic:cNvPr id="0" name="' + 'org' + n + '"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="' + rid + '"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="' + cxe + '" cy="' + cye + '"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>';
+      }
     });
     var hasLogo = !!(L && L.logo && dims), hdr = '', ftr = '';
     var nsH = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"';
@@ -1275,7 +1429,7 @@
     }
     var pg = landscape ? '<w:pgSz w:w="16838" w:h="11906" w:orient="landscape"/>' : '<w:pgSz w:w="11906" w:h="16838"/>';
     var sect = '<w:sectPr>' + (L ? '<w:headerReference w:type="default" r:id="rId2"/><w:footerReference w:type="default" r:id="rId3"/>' : '') + pg + '<w:pgMar w:top="720" w:right="720" w:bottom="720" w:left="720" w:header="360" w:footer="360" w:gutter="0"/></w:sectPr>';
-    var ns = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"';
+    var ns = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"';
     var styles = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles ' + ns + '><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Calibri"/><w:sz w:val="22"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="120" w:line="264" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults>' +
       '<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style>' +
       '<w:style w:type="paragraph" w:styleId="Title"><w:name w:val="Title"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:after="160"/></w:pPr><w:rPr><w:b/><w:color w:val="1F2E3A"/><w:sz w:val="40"/></w:rPr></w:style>' +
@@ -1284,7 +1438,8 @@
     var zip = new JSZip();
     zip.file('[Content_Types].xml', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="png" ContentType="image/png"/><Default Extension="jpeg" ContentType="image/jpeg"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>' + (L ? '<Override PartName="/word/header1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml"/><Override PartName="/word/footer1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/>' : '') + '</Types>');
     zip.file('_rels/.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>');
-    zip.file('word/_rels/document.xml.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>' + (L ? '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/header" Target="header1.xml"/><Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/>' : '') + '</Relationships>');
+    zip.file('word/_rels/document.xml.rels', '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>' + (L ? '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/header" Target="header1.xml"/><Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/>' : '') + orgImgs.map(function(im) { return '<Relationship Id="' + im.rid + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/' + im.name + '"/>'; }).join('') + '</Relationships>');
+    orgImgs.forEach(function(im) { zip.file('word/media/' + im.name, im.b64, { base64: true }); });
     if (L) {
       zip.file('word/header1.xml', hdr); zip.file('word/footer1.xml', ftr);
       if (hasLogo) {
@@ -1308,6 +1463,7 @@
     return '<p class="sf-pv-title">' + escapeHtml(c.title) + '</p>' + c.blocks.map(function(b) {
       if (b.type === 'heading') return '<p class="sf-pv-h' + b.level + '">' + escapeHtml(b.text) + '</p>';
       if (b.type === 'p') return '<p>' + escapeHtml(b.text).replace(/\n/g, '<br>') + '</p>';
+      if (b.type === 'orgchart') { try { var op = b._png || (b._png = sfOrgPng(b.nodes)); return op ? '<div class="sf-pv-tbl"><img alt="Organogram" style="max-width:none;width:' + Math.round(op.w * 0.8) + 'px" src="' + op.dataUrl + '"></div>' : ''; } catch (e) { return ''; } }
       if (b.type === 'bullets') return '<ul>' + b.items.map(function(i) { return '<li>' + escapeHtml(i) + '</li>'; }).join('') + '</ul>';
       if (b.type === 'table') return '<div class="sf-pv-tbl"><table><tr>' + b.headers.map(function(h) { return '<th>' + escapeHtml(h) + '</th>'; }).join('') + '</tr>' +
         b.rows.slice(0, 12).map(function(r) { return '<tr>' + r.map(function(c) { return '<td>' + escapeHtml(c) + '</td>'; }).join('') + '</tr>'; }).join('') + '</table>' +
@@ -1387,12 +1543,22 @@
 
   // ---------- loading ----------
   async function sfLoadList() {
-    try { var d = await sfApi('/api/safety-files'); sf.index = d.index; sf.files = d.files; sf.msg = ''; }
-    catch (e) { sf.msg = e.message; }
+    try { var d = await sfApi('/api/safety-files'); sf.index = d.index; sf.files = d.files; sf.msg = ''; sfCacheSet('sf_cache_list', { index: d.index, files: d.files }); }
+    catch (e) {
+      var c = isNetErr(e) && offlineAllowed() ? sfCacheGet('sf_cache_list') : null;
+      if (c) { sf.index = c.index; sf.files = c.files; sf.msg = '!Offline: showing your last saved copy. Uploads and AI drafts need signal.'; }
+      else sf.msg = e.message;
+    }
     sf.view = 'list'; sfRender();
   }
   async function sfLoadFile(id, keepView) {
-    var d = await sfApi('/api/safety-files/' + id);
+    var d;
+    try { d = await sfApi('/api/safety-files/' + id); sfCacheSet('sf_cache_file_' + id, d); }
+    catch (e) {
+      var c = isNetErr(e) && offlineAllowed() ? sfCacheGet('sf_cache_file_' + id) : null;
+      if (!c) throw e;
+      d = c; sf.msg = '!Offline: showing your last saved copy. Uploads and AI drafts need signal.';
+    }
     sf.cur = d; if (!keepView) sf.view = 'file';
     sfRender();
   }
@@ -1410,8 +1576,14 @@
   async function sfContent(key) {
     var ck = sf.cur.file.id + ':' + key;
     if (sf.cache[ck]) return sf.cache[ck];
-    var d = await sfApi('/api/safety-files/' + sf.cur.file.id + '/items/' + key);
-    if (d.generated) sf.cache[ck] = d.generated;
+    var d;
+    try { d = await sfApi('/api/safety-files/' + sf.cur.file.id + '/items/' + key); }
+    catch (e) {
+      var c = isNetErr(e) && offlineAllowed() ? sfCacheGet('sf_c_' + ck) : null;
+      if (!c) throw e;
+      sf.cache[ck] = c; return c;
+    }
+    if (d.generated) { sf.cache[ck] = d.generated; sfCacheSet('sf_c_' + ck, d.generated); }
     return d.generated;
   }
   async function sfDownloadDoc(id, name) {
@@ -1604,13 +1776,20 @@
     rd.readAsDataURL(f);
   });
 
+  // ---- offline: service worker (only on the real https site) ----
+  try { if ('serviceWorker' in navigator && /^https:$/.test(location.protocol)) window.addEventListener('load', function() { navigator.serviceWorker.register('sw.js').catch(function() {}); }); } catch (e) {}
+
   // ---- start ----
   (async function boot() {
     var params = new URLSearchParams(window.location.search);
     var paid = params.get('payment') === 'success';
     if (window.location.search) { try { window.history.replaceState({}, '', window.location.pathname); } catch (e) {} }
     var s = await sb.auth.getSession();
-    if (!s.data.session) { showScreen('auth'); return; }
+    if (!s.data.session) {
+      var cm0 = !navigator.onLine ? cachedMe() : null;
+      if (cm0) { me = cm0; enterApp(); return; }
+      showScreen('auth'); return;
+    }
     await loadMeAndRoute();
     if (paid && me && !me.access) pollForActivation();
   })();
@@ -1654,6 +1833,7 @@
     var homeCount = document.getElementById('home-count');
     var homePending = document.getElementById('home-pending');
     var homeRecent = document.getElementById('home-recent');
+    renderQueue();
     countEl.textContent = entries.length;
     homeCount.textContent = entries.length;
     homePending.textContent = entries.length;
@@ -1679,6 +1859,7 @@
     listEl.querySelectorAll('[data-remove-idx]').forEach(function(btn) {
       btn.addEventListener('click', function() {
         entries.splice(parseInt(btn.getAttribute('data-remove-idx'), 10), 1);
+        persistLocal();
         renderList();
       });
     });
@@ -1811,6 +1992,13 @@
     document.getElementById('pass-generate-btn').textContent = 'Generate Full Assessment';
   });
 
+  function queueAssessment(path, payload, activity) {
+    queue.push({ id: String(Date.now()), path: path, payload: payload, activity: activity || 'Assessment', at: Date.now() });
+    saveQueue(); renderQueue();
+    document.getElementById('pass-notes').value = '';
+    document.getElementById('pass-draft-card').innerHTML = '<p style="font-size:13px; margin:0;"><strong>No signal. Saved on your phone.</strong><br>It will be generated automatically when you are back online. Find it under History.</p>';
+    document.getElementById('pass-draft-wrap').style.display = 'block';
+  }
   async function generateEntry() {
     var genErrElEarly = document.getElementById('pass-gen-err');
     if (!me) {
@@ -1842,6 +2030,10 @@
         ? { activityName: activityName, taskNotes: notes, columns: templateState.columns.map(function(c) { return c.text; }) }
         : { activityName: activityName, taskNotes: notes };
 
+      if (!navigator.onLine) {
+        if (offlineAllowed() && !usingTemplate) { queueAssessment(API_PATH, payload, activityName); return; }
+        throw new Error('offline');
+      }
       var response = await apiFetch(API_PATH, { method: "POST", body: JSON.stringify(payload) });
       if (!response.ok) {
         var errBody = await response.json().catch(function() { return {}; });
@@ -1859,6 +2051,7 @@
         templateEntries = templateEntries.concat(rows);
       } else {
         rows.forEach(function(row) { entries.push(row); });
+        persistLocal();
         renderList();
       }
 
@@ -1880,6 +2073,11 @@
         document.getElementById('pass-export-template-btn').addEventListener('click', exportToTemplate);
       }
     } catch (err) {
+      if (isNetErr(err) && offlineAllowed() && !usingTemplate && typeof payload !== 'undefined') { queueAssessment(API_PATH, payload, activityName); return; }
+      if (err && err.message === 'offline' || !navigator.onLine) {
+        genErrEl.textContent = 'You are offline. ' + (offlineAllowed() ? 'Assessments that use a template need signal.' : 'Check your signal and try again. Offline mode is included in the Unlimited plan.');
+        genErrEl.style.display = 'block'; console.error('Generation error:', err); return;
+      }
       genErrEl.textContent = 'Could not generate the assessment right now. The server may still be waking up (free tier) — wait a few seconds and try again, or rephrase the details.';
       genErrEl.style.display = 'block';
       console.error('Generation error:', err);
